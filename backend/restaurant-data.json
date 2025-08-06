@@ -1,0 +1,131 @@
+{
+  "restaurant": {
+    "name": "ABC Restaurant",
+    "location": "123 Main Street, Mumbai, Maharashtra, India",
+    "contact": {
+      "phone": "+91-9876543210",
+      "email": "abc.restaurant@example.com"
+    },
+    "website": "www.abcrestaurant.in",
+    "cuisine": ["Indian", "Chinese", "Continental"],
+    "ambience": "Casual Dining with air-conditioned indoor and outdoor seating"
+  },
+  "hours": {
+    "Monday": "11:00 AM - 11:00 PM",
+    "Tuesday": "11:00 AM - 11:00 PM",
+    "Wednesday": "11:00 AM - 11:00 PM",
+    "Thursday": "11:00 AM - 11:00 PM",
+    "Friday": "11:00 AM - 11:30 PM",
+    "Saturday": "11:00 AM - 11:30 PM",
+    "Sunday": "9:00 AM - 11:00 PM"
+  },
+  "menuHighlights": {
+    "Indian": ["Paneer Butter Masala", "Butter Naan", "Chicken Biryani"],
+    "Chinese": ["Veg Manchurian", "Hakka Noodles", "Schezwan Fried Rice"],
+    "Continental": ["Grilled Chicken", "White Sauce Pasta", "Caesar Salad"],
+    "Desserts": ["Gulab Jamun", "Brownie with Ice Cream"],
+    "Beverages": ["Fresh Lime Soda", "Cold Coffee", "Masala Chai"],
+    "specials": ["Weekend Buffet", "Happy Hours on Drinks (5 PM - 7 PM)"],
+    "kidsMenu": ["Mini Pizzas", "Pasta with Cheese", "Fruit Salad"],
+    "healthyOptions": ["Quinoa Salad", "Grilled Fish", "Vegetable Stir Fry"],
+    "glutenFreeOptions": ["Grilled Chicken Salad", "Vegetable Soup"],
+    "spicyOptions": ["Spicy Paneer Tikka", "Hot and Sour Soup"],
+    "jainOptions": ["Jain Paneer Tikka", "Jain Vegetable Biryani"],
+    "veganOptions": ["Vegan Burger", "Vegan Pasta", "Vegan Salad"],
+    "popularDishes": ["Paneer Tikka", "Chicken Tikka Masala", "Veg Fried Rice"],
+    "chefSpecials": ["Chef's Special Thali", "Seasonal Vegetable Curry"],
+    "seasonalSpecials": ["Mango Lassi (Summer)", "Pumpkin Soup (Winter)"],
+    "beveragePairings": {
+      "Indian": ["Masala Chai", "Lassi"],
+      "Chinese": ["Iced Tea", "Lemonade"],
+      "Continental": ["Red Wine", "Sparkling Water"]
+    },
+    "allergenInfo": {
+      "nuts": "Some dishes may contain nuts. Please ask the staff for details.",
+      "gluten": "Gluten-free options available. Please inquire.",
+      "dairy": "Dairy products used in many dishes. Vegan options available."
+    },
+    "calorieInfo": {
+      "Paneer Butter Masala": "450 kcal",
+      "Butter Naan": "200 kcal",
+      "Chicken Biryani": "600 kcal",
+      "Veg Manchurian": "300 kcal",
+      "Hakka Noodles": "400 kcal",
+      "Schezwan Fried Rice": "500 kcal",
+      "Grilled Chicken": "400 kcal",
+      "White Sauce Pasta": "350 kcal",
+      "Caesar Salad": "250 kcal",
+      "Gulab Jamun": "100 kcal",
+      "Brownie with Ice Cream": "300 kcal",
+      "Fresh Lime Soda": "50 kcal",
+      "Cold Coffee": "150 kcal",
+      "Masala Chai": "75 kcal",
+      "Mini Pizzas": "250 kcal",  
+      "Pasta with Cheese": "400 kcal",
+      "Fruit Salad": "200 kcal",
+      "Quinoa Salad": "300 kcal",
+      "Grilled Fish": "400 kcal",
+      "Vegetable Stir Fry": "350 kcal",
+      "Grilled Chicken Salad": "300 kcal",
+      "Vegetable Soup": "200 kcal",
+      "Spicy Paneer Tikka": "400 kcal"
+    }
+  },
+  "services": {
+    "dineIn": true,
+    "takeaway": true,
+    "deliveryPartners": ["Swiggy", "Zomato", "Uber Eats"],
+    "onlineOrderLink": "www.abcrestaurant.in/order"
+  },
+  "reservations": {
+    "available": true,
+    "bookingMethods": ["Call", "Website", "Zomato Table Booking"],
+    "partyBooking": {
+      "enabled": true,
+      "maxGuests": 40,
+      "contact": "Call restaurant for party bookings"
+    }
+  },
+  "paymentOptions": [
+    "Cash",
+    "Credit/Debit Cards",
+    "UPI",
+    "Sodexo/Zeta (food only)"
+  ],
+  "dietaryOptions": {
+    "vegetarian": true,
+    "nonVegetarian": true,
+    "jainAvailable": true,
+    "veganMarked": true,
+    "spiceLevels": ["Mild", "Medium", "Spicy"]
+  },
+  "facilities": {
+    "parking": "2-wheeler & 4-wheeler available",
+    "wifi": "Free",
+    "airConditioning": true,
+    "wheelchairAccessible": true,
+    "restrooms": true
+  },
+  "faqs": [
+    {
+      "question": "Do you offer Jain options?",
+      "answer": "Yes, selected dishes can be prepared Jain-style on request."
+    },
+    {
+      "question": "Is home delivery available?",
+      "answer": "Yes, through Swiggy, Zomato, and our website."
+    },
+    {
+      "question": "Do you serve alcohol?",
+      "answer": "No, we are a non-alcoholic establishment."
+    },
+    {
+      "question": "Is outdoor seating available?",
+      "answer": "Yes, we have a small outdoor seating area."
+    },
+    {
+      "question": "Do you allow pets?",
+      "answer": "Pets are allowed in the outdoor area only."
+    }
+  ]
+}
