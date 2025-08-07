@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
-
+import parse from "html-react-parser";
+import square from "/square-solid-full.svg";
+import paperPlane from "/paper-plane-solid-full.svg";
+import mic from "/microphone-solid-full.svg";
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 const Chatbot = () => {
@@ -20,7 +23,7 @@ const Chatbot = () => {
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = "en-US";
+      recognitionRef.current.lang = "";
 
       recognitionRef.current.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
@@ -53,7 +56,7 @@ const Chatbot = () => {
         recognitionRef.current.stop();
       }
     };
-  }, []);
+  },[]);
 
   const toggleSpeechRecognition = () => {
     if (!SpeechRecognition) {
@@ -131,7 +134,7 @@ const Chatbot = () => {
                 : "bg-gray-200 self-start mr-auto text-left"
             }`}
           >
-            <div className="text-base text-gray-800">{m.parts[0]?.text}</div>
+            <div className="text-base text-gray-800">{parse(m.parts[0]?.text)}</div>
           </div>
         ))}
       </div>
@@ -147,18 +150,18 @@ const Chatbot = () => {
         />
         <button
           className={`px-4 py-2 rounded-lg transition ${
-            isListening ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"
+            isListening ? "bg-gray-400 hover:bg-gray-600" : "bg-gray-400 hover:bg-gray-700"
           } text-white`}
           onClick={toggleSpeechRecognition}
           disabled={!SpeechRecognition}
         >
-          {isListening ? "Stop 🎙️" : "Speak 🎙️"}
+          {isListening ? <img src={square} alt="pause" className="w-6 h-6 inline-block" /> : <img src={mic} alt="mic" className="w-6 h-6 inline-block"  />}
         </button>
         <button
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          className="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-600 transition"
           onClick={() => sendMessage()}
         >
-          Send
+          <img src={paperPlane} alt="Send" className="w-5 h-5 inline-block" />
         </button>
       </div>
     </div>

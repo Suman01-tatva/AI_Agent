@@ -1,12 +1,12 @@
 {
   "restaurant": {
-    "name": "ABC Restaurant",
+    "name": "ITC Restaurant",
     "location": "123 Main Street, Mumbai, Maharashtra, India",
     "contact": {
       "phone": "+91-9876543210",
-      "email": "abc.restaurant@example.com"
+      "email": "itc.restaurant@example.com"
     },
-    "website": "www.abcrestaurant.in",
+    "website": "www.itcrestaurant.in",
     "cuisine": ["Indian", "Chinese", "Continental"],
     "ambience": "Casual Dining with air-conditioned indoor and outdoor seating"
   },

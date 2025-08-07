@@ -17,6 +17,8 @@ from bs4 import BeautifulSoup
 # Load environment variables
 load_dotenv()
 
+os.environ["LANGCHAIN_TRACING_V2"] = "false"
+
 # Flask app setup
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "secret-key")
@@ -124,7 +126,11 @@ def chat():
 
     # Inject knowledge into latest human input
     knowledge_context = retrieve_knowledge(user_input)
-    final_input = f"{user_input}\n\nContext (if any):\n{knowledge_context}"
+    final_input = (
+        f"{user_input}\n\n"
+        f"(Note: Always respond in the **same language** as the user.)\n\n"
+        f"Context (if any):\n{knowledge_context}"
+    )
 
     # Create LangChain message list with one HumanMessage
     messages = [HumanMessage(content=final_input)]

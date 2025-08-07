@@ -19,7 +19,7 @@ if not api_key:
 
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.0-flash",
-    temperature=0,
+    temperature=0.5,
     google_api_key=api_key,
 )
 
@@ -74,7 +74,6 @@ def call_agent(state: ChatState, config: RunnableConfig):
         return {"messages": messages, "tool_calls": result["tool_calls"]}
 
     return {"messages": messages + [result], "tool_calls": []}
-
 
 def call_tool(state: ChatState, config: RunnableConfig):
     
