@@ -13,6 +13,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 import hashlib
 import requests
 from bs4 import BeautifulSoup
+from langchain.document_loaders import PyPDFLoader
 
 # Load environment variables
 load_dotenv()
@@ -54,6 +55,11 @@ def scrape_website(url):
     text = soup.get_text()
     return text
 
+def pdf_to_document(pdf_path: str) -> list[Document]:
+    pdf_loader = PyPDFLoader(pdf_path)
+    pages = pdf_loader.load()
+    return pages
+
 def get_file_hash(filepath):
     try:
         with open(filepath, "rb") as f:
@@ -83,6 +89,7 @@ try:
             metadata={"source": "itchotels.com", "type": "scraped"}
         )
         documents.append(scraped_doc)
+        documents.extend(pdf_to_document("./restaurant_menu.pdf"))
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
         chunks = text_splitter.split_documents(documents)
         vector_store = FAISS.from_documents(chunks, embeddings)

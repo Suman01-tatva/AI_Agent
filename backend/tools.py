@@ -1,38 +1,47 @@
 from typing import Optional
 from langchain_core.tools import tool, BaseTool
 from pydantic import BaseModel, Field
+from typing import ClassVar
+from langchain_community.tools.tavily_search import TavilySearchResults
+
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 
 from tools_utils import (
     insert_booking,
     is_slot_available,
-    get_next_available_slot,
     get_user_slot,
     cancel_slot,
     update_slot,
     time_slots,
 )
-from typing import ClassVar
 
 # --- Input Schemas ---
-
 class ReservationInput(BaseModel):
-    name: str = Field(..., description="Customer name")
-    contact: str = Field(..., description="Customer contact number")
-    time: str = Field(..., description="Booking time in HH:MM")
-    guests: int = Field(..., description="Number of guests")
-    date: str = Field(..., description="Booking date in YYYY-MM-DD")
+    """Input schema for creating or saving a reservation."""
+    name: str
+    contact: str
+    time: str
+    guests: int
+    date: str
 
 class SlotInput(BaseModel):
-    slot: str = Field(..., description="Suggested time slot in HH:MM format")
+    """Input schema for identifying a time slot."""
+    slot: str
 
 class DateInput(BaseModel):
-    date: str = Field(..., description="Date to check for available slots")
-    time: Optional[str] = Field(None, description="Specific time to check availability in formate like(10 PM,11AM), if any")
+    """Input schema for checking availability on a specific date and time."""
+    date: str
+    time: Optional[str] = None
 
 class CancelInput(BaseModel):
-    slot_id: int = Field(..., description="ID of the booking to cancel")
+    """Input schema for cancelling a reservation by ID."""
+    slot_id: int
 
 class UpdateBookingInput(BaseModel):
+    """Input schema for updating a booking."""
     id: int
     bookingName: str
     contactNumber: str
@@ -41,53 +50,74 @@ class UpdateBookingInput(BaseModel):
     noOfPeople: int
 
 class RetrieveInput(BaseModel):
-    name: Optional[str] = Field(None, description="Customer name")
-    contact: Optional[str] = Field(None, description="Customer contact number")
+    """Input schema for retrieving bookings using optional name or contact."""
+    name: Optional[str] = None
+    contact: Optional[str] = None
 
 # --- Tools ---
+@tool(args_schema=ReservationInput)
+def Create_User_Details(name: str, contact: str, time: str, guests: int, date: str) -> str:
+    """Collect booking details before confirmation."""
+    return (
+        f"📋 Booking details:\n"
+        f"👤 Name: {name}\n"
+        f"📞 Contact: {contact}\n"
+        f"📅 Date: {date}\n"
+        f"⏰ Time: {time}\n"
+        f"👥 Guests: {guests}\n"
+        f"👉 Reply with 'Yes' to confirm or update the details."
+    )
 
 @tool(args_schema=ReservationInput)
 def Save_Reservation(name: str, contact: str, time: str, guests: int, date: str) -> str:
-    """Checks availability and saves reservation if possible, or suggests next available slot."""
+    """Save a reservation if the selected slot is available."""
     if is_slot_available(date, time):
         return insert_booking(name, contact, time, guests, date)
-    next_slot = get_next_available_slot(date, time)
-    return (
-        f"❌ {time} on {date} is full.\n👉 Next available: {next_slot}"
-        if next_slot else f"❌ No slots available on {date}."
-    )
+    return f"❌ Sorry, booking is full or the slot at {time} on {date} is already booked. Try another time."
 
 @tool(args_schema=DateInput)
-def Check_Slot_Availability(date: str , time: Optional[str]) -> str:
-    """Returns available time slots for a given date. If a specific time is provided, checks availability. """
+def Check_Slot_Availability(date: str, time: Optional[str] = None) -> str:
+    """Check whether a time slot is available on a specific date."""
     if time:
-        if not is_slot_available(date, time):
-            return f"✅ The table is available on {date} at {time}."
-        else:
-            return f"❌ The table is already occupied on {date} at {time}."
-
+        if is_slot_available(date, time):
+            return f"✅ Slot available at {time} on {date}."
+        return f"❌ Booking full or slot not available on {date}."
+    
     available = [t for t in time_slots if is_slot_available(date, t)]
     if available:
-        return f"✅ Available time slots on {date}: {available}"
-    else:
-        return f"❌ No slots available on {date}."
+        return f"✅ Available slots on {date}: {', '.join(available)}"
+    return f"❌ Booking full or no available slots on {date}."
 
 @tool(args_schema=RetrieveInput)
 def Retrieve_User_Bookings(name: Optional[str] = None, contact: Optional[str] = None) -> str:
-    """Retrieves current reservation(s) for a given user by name or contact number."""
-    return get_user_slot(name=name, contact=contact)
+    """Retrieve all active or cancelled bookings for a user using name or contact."""
+    result = get_user_slot(name=name, contact=contact)
+    if isinstance(result, str):
+        return result
+    if not result:
+        return "ℹ️ No active bookings found."
+    
+    response_lines = ["📖 Your Reservations:"]
+    for slot in result:
+        status = "✅ Active" if slot.get("isActive", True) else "❌ Cancelled"
+        response_lines.append(
+            f"- ID #{slot.get('id')} | {slot.get('bookingDate')} at {slot.get('bookingTime')} | Guests: {slot.get('noOfPeople')} | {status}"
+        )
+    return "\n".join(response_lines)
 
 class Cancel_Reservation(BaseTool):
+    """Cancel a reservation by its booking ID."""
     name: ClassVar[str] = "Cancel_Reservation"
-    description: ClassVar[str] = "Cancels a user's booking based on slot ID"
+    description: ClassVar[str] = "Cancel a reservation by booking ID"
     args_schema: ClassVar[type[BaseModel]] = CancelInput
 
     def _run(self, slot_id: int) -> str:
         return cancel_slot(slot_id)
 
 class Update_Booking_Time(BaseTool):
+    """Update the time and details of an existing reservation."""
     name: ClassVar[str] = "Update_Booking_Time"
-    description: ClassVar[str] = "Updates a user's booking time using full slot info"
+    description: ClassVar[str] = "Update a reservation with new details"
     args_schema: ClassVar[type[BaseModel]] = UpdateBookingInput
 
     def _run(self, **kwargs) -> str:
@@ -95,10 +125,11 @@ class Update_Booking_Time(BaseTool):
 
 # --- Tool Registry ---
 all_tools = [
-    # Create_User_Details,
+    Create_User_Details,
     Save_Reservation,
     Check_Slot_Availability,
     Retrieve_User_Bookings,
     Cancel_Reservation(),
     Update_Booking_Time(),
 ]
+ 
