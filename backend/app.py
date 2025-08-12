@@ -14,6 +14,13 @@ import hashlib
 import requests
 from bs4 import BeautifulSoup
 from langchain.document_loaders import PyPDFLoader
+from flask import Flask, request, jsonify
+from werkzeug.utils import secure_filename
+from io import BytesIO
+from PIL import Image
+import google.generativeai as genai
+import os
+import base64
 
 # Load environment variables
 load_dotenv()
@@ -123,42 +130,206 @@ def retrieve_knowledge(query: str) -> str:
 # Build LangGraph once at startup
 graph = build_chat_graph()
 
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+
+def compress_image(file, target_quality=85, max_size=(1024, 1024)):
+    try:
+        img = Image.open(file)
+
+        # Convert RGBA → RGB (JPEG doesn't support alpha)
+        if img.mode in ("RGBA", "P"):
+            img = img.convert("RGB")
+
+        # Resize if needed (keep aspect ratio)
+        img.thumbnail(max_size)
+
+        img_bytes_io = BytesIO()
+        img.save(img_bytes_io, format="JPEG", quality=target_quality, optimize=True)
+        img_bytes_io.seek(0)
+
+        return img_bytes_io.read(), "image/jpeg"
+
+    except Exception as e:
+        raise ValueError(f"Image compression failed: {str(e)}")
+
+@app.route("/image-chat", methods=["POST"])
+def image_chat():
+    if "image" not in request.files:
+        return jsonify({"error": "❗ No image file provided"}), 400
+
+    image_file = request.files["image"]
+    filename = secure_filename(image_file.filename)
+
+    try:
+        # Compress image
+        compressed_bytes, mime_type = compress_image(image_file)
+
+        # Use image description directly to fetch vector store context
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        image_desc = model.generate_content([
+            "Briefly describe the key elements of this image (50 words).",
+            {
+                "mime_type": mime_type,
+                "data": compressed_bytes
+            }
+        ]).text.strip()
+
+        # Retrieve relevant hotel knowledge
+        knowledge_context = retrieve_knowledge(image_desc)
+
+        # Final single Gemini call with both image details + context
+        prompt_text = (
+            "You are an assistant for ITC Narmada Hotel, Ahmedabad. "
+            "Using the image details and hotel knowledge provided, "
+            "give a short, accurate answer ONLY about this hotel. "
+            "If unrelated, say: 'The image does not seem related to ITC Narmada Hotel.' "
+            "Max 30 words, match user language.\n\n"
+            f"Image details: {image_desc}\n"
+            f"Hotel knowledge: {knowledge_context}"
+        )
+
+        final_response = model.generate_content(prompt_text)
+
+        return jsonify({"response": final_response.text})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/chat", methods=["POST"])
 def chat():
+    if graph is None:
+        return jsonify({"response": "❌ Chatbot is not available at the moment."}), 500
+
     data = request.get_json()
     user_input = data.get("message", "").strip()
+    user_lang = data.get("language", "en")  # Language code from frontend
 
     if not user_input:
         return jsonify({"error": "❗ No message provided"}), 400
 
-    # Inject knowledge into latest human input
+    # Retrieve contextual knowledge
     knowledge_context = retrieve_knowledge(user_input)
     final_input = (
         f"{user_input}\n\n"
-        f"(Note: Always respond in the **same language** as the user.)\n\n"
+        f"(Note: Always respond in **{user_lang}** only. Never switch languages.)\n\n"
         f"Context (if any):\n{knowledge_context}"
     )
 
-    # Create LangChain message list with one HumanMessage
     messages = [HumanMessage(content=final_input)]
 
-    # Invoke LangGraph
     try:
         result = graph.invoke({"messages": messages})
     except Exception as e:
         logging.error("LangGraph invocation failed:", exc_info=e)
         return jsonify({"response": "❌ Something went wrong with the chatbot."})
 
-    # Extract response
-    last_msg = result["messages"][-1]
-    if isinstance(last_msg, dict) and "output" in last_msg:
-        response_text = last_msg["output"]
-    elif hasattr(last_msg, "content"):
-        response_text = last_msg.content
-    else:
-        response_text = str(last_msg)
+    response_text = ""
+    if "messages" in result and result["messages"]:
+        last_msg = result["messages"][-1]
+        if hasattr(last_msg, "content"):
+            response_text = last_msg.content
+        elif isinstance(last_msg, dict):
+            response_text = last_msg.get("output", "")
+        else:
+            response_text = str(last_msg)
 
-    return jsonify({"response": response_text})
+    return jsonify({"response": response_text, "language": user_lang})
+
+
+ELEVEN_API_KEY = os.getenv("ELEVEN_API_KEY")
+VOICE_ID = os.getenv("ELEVEN_VOICE_ID")
+
+TTS_MODEL_ID = "eleven_multilingual_v2"  # TTS multilingual
+STT_MODEL_ID = "scribe_v1"  # STT multilingual
+
+@app.route("/stt", methods=["POST"])
+def stt():
+    if not ELEVEN_API_KEY:
+        return jsonify({"error": "Missing ELEVEN_API_KEY"}), 500
+
+    if "audio" not in request.files:
+        return jsonify({"error": "No audio file uploaded"}), 400
+
+    user_lang = request.form.get("language", "en")  # Get from frontend form-data
+
+    try:
+        audio_file = request.files["audio"]
+        url = "https://api.elevenlabs.io/v1/speech-to-text"
+
+        headers = {"xi-api-key": ELEVEN_API_KEY}
+        data = {
+            "model_id": STT_MODEL_ID,
+            "language": user_lang  # Force STT to use the selected language
+        }
+
+        files = {"file": (audio_file.filename, audio_file.stream, audio_file.mimetype)}
+
+        response = requests.post(url, headers=headers, data=data, files=files)
+
+        if response.status_code != 200:
+            try:
+                err_msg = response.json().get("detail", {}).get("message", "")
+            except Exception:
+                err_msg = response.text
+            logging.error(f"STT API error {response.status_code}: {err_msg}")
+            return (
+                jsonify({"error": err_msg or f"STT API error {response.status_code}"}),
+                500,
+            )
+
+        result = response.json()
+        transcript = result.get("text", "").strip()
+        return jsonify({"transcript": transcript, "language": user_lang})
+
+    except Exception as e:
+        logging.error("STT error:", exc_info=e)
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/tts", methods=["POST"])
+def tts():
+    if not ELEVEN_API_KEY or not VOICE_ID:
+        return jsonify({"error": "Missing ELEVEN_API_KEY or ELEVEN_VOICE_ID"}), 500
+
+    data = request.get_json()
+    text = data.get("text", "").strip()
+    user_lang = data.get("language", "en")  # From frontend
+
+    if not text:
+        return jsonify({"error": "No text provided"}), 400
+
+    try:
+        url = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}"
+        payload = {
+            "text": text,
+            "model_id": TTS_MODEL_ID,
+            "voice_settings": {"stability": 0.5, "similarity_boost": 0.8},
+            "language": user_lang  # Ensure TTS uses the selected language
+        }
+        headers = {
+            "Accept": "audio/mpeg",
+            "Content-Type": "application/json",
+            "xi-api-key": ELEVEN_API_KEY,
+        }
+
+        response = requests.post(url, json=payload, headers=headers)
+
+        if response.status_code != 200:
+            try:
+                err_msg = response.json().get("detail", {}).get("message", "")
+            except Exception:
+                err_msg = response.text
+            logging.error(f"TTS API error {response.status_code}: {err_msg}")
+            return (
+                jsonify({"error": err_msg or f"TTS API error {response.status_code}"}),
+                500,
+            )
+
+        audio_base64 = base64.b64encode(response.content).decode("utf-8")
+        return jsonify({"audio": audio_base64, "language": user_lang})
+
+    except Exception as e:
+        logging.error("TTS error:", exc_info=e)
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
