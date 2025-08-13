@@ -30,7 +30,9 @@ tools = all_tools
 
 current_date = date.today().isoformat()
 
-with open("prompt.txt", "r", encoding="utf-8") as f:
+PROMPT_PATH = os.path.join(os.path.dirname(__file__), "prompt.txt")
+
+with open(PROMPT_PATH, "r", encoding="utf-8") as f:
     raw_prompt = f.read()
 
     system_prompt = raw_prompt.format(current_date=current_date)

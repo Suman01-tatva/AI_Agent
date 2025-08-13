@@ -21,6 +21,9 @@ from PIL import Image
 import google.generativeai as genai
 import os
 import base64
+import re
+from langchain_community.document_loaders import RecursiveUrlLoader, UnstructuredURLLoader
+
 
 # Load environment variables
 load_dotenv()
@@ -32,18 +35,20 @@ app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "secret-key")
 CORS(app, supports_credentials=True)
 
+JSON_PATH = os.path.join(os.path.dirname(__file__), "restaurant-data.json")
+PDF_PATH = os.path.join(os.path.dirname(__file__), "restaurant_menu.pdf")
+
 # Load knowledge file
 try:
-    with open("restaurant-data.json", "r") as f:
+    with open(JSON_PATH, "r") as f:
         knowledge = json.load(f)
 except Exception as e:
     knowledge = {}
     logging.error("Failed to load knowledge base:", exc_info=e)
 
 # --- Knowledge Embedding (with Cache) ---
-FAISS_STORE_DIR = "faiss_store"
+FAISS_STORE_DIR = os.path.join(os.path.dirname(__file__), "faiss_store")
 HASH_FILE_PATH = os.path.join(FAISS_STORE_DIR, "data.hash")
-JSON_PATH = "restaurant-data.json"
 
 def json_to_documents(json_data: dict) -> list[Document]:
     documents = []
@@ -56,11 +61,51 @@ def json_to_documents(json_data: dict) -> list[Document]:
         )
     return documents
 
-def scrape_website(url):
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, "html.parser")
-    text = soup.get_text()
-    return text
+def scrape_website(url: str) -> list[Document]:
+    def clean_content(html: str) -> str:
+        try:
+            soup = BeautifulSoup(html, "html.parser")
+            # Remove scripts, styles, nav, footer, header
+            for element in soup(["script", "style", "nav", "footer", "header"]):
+                element.decompose()
+            text = soup.get_text(separator=" ", strip=True)
+            text = re.sub(r"\s+", " ", text).strip()
+            return text
+        except Exception:
+            return ""
+
+    def url_filter(url: str, visited: set) -> bool:
+        if url in visited:
+            return False
+        exclude_patterns = [
+            r".*\.(jpg|png|gif|jpeg|css|js|woff|woff2|ttf|ico|svg)$",
+            r".*/(login|signup|admin|cart|checkout).*",
+        ]
+        return not any(re.match(pattern, url) for pattern in exclude_patterns)
+
+    visited_urls = set()
+
+    try:
+        # Step 1: Crawl for URLs
+        crawler = RecursiveUrlLoader(url=url, prevent_outside=True)
+        pages = crawler.load()
+
+        # Step 2: Filter URLs
+        filtered_urls = []
+        for page in pages:
+            source_url = page.metadata.get("source", url)
+            if url_filter(source_url, visited_urls):
+                visited_urls.add(source_url)
+                filtered_urls.append(source_url)
+
+        # Step 3: Load cleaned content for filtered URLs
+        loader = UnstructuredURLLoader(urls=filtered_urls, extractor=clean_content)
+        raw_docs = loader.load()
+        return [doc for doc in raw_docs if len(doc.page_content.strip()) > 50]
+
+    except Exception as e:
+        print(f"Error scraping {url}: {e}")
+        return []
 
 def pdf_to_document(pdf_path: str) -> list[Document]:
     pdf_loader = PyPDFLoader(pdf_path)
@@ -89,15 +134,11 @@ try:
 
     if current_hash != stored_hash or not os.path.exists(os.path.join(FAISS_STORE_DIR, "index.faiss")):
         logging.info("🔄 Rebuilding FAISS vector store...")
-        documents = json_to_documents(knowledge)
-        scraped_text = scrape_website(os.getenv("SITE_URL"))
-        scraped_doc = Document(
-            page_content=scraped_text,
-            metadata={"source": "itchotels.com", "type": "scraped"}
-        )
-        documents.append(scraped_doc)
-        documents.extend(pdf_to_document("./restaurant_menu.pdf"))
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+        documents = []
+        documents.extend(json_to_documents(knowledge))
+        documents.extend(scrape_website(os.getenv("SITE_URL")))
+        documents.extend(pdf_to_document(PDF_PATH))
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=700, chunk_overlap=80)
         chunks = text_splitter.split_documents(documents)
         vector_store = FAISS.from_documents(chunks, embeddings)
         vector_store.save_local(FAISS_STORE_DIR)
@@ -112,7 +153,7 @@ try:
         )
         logging.info("✅ Loaded FAISS vector store from disk.")
 
-    retriever = vector_store.as_retriever(search_kwargs={"k": 3})
+    retriever = vector_store.as_retriever(search_kwargs={"k": 5})
 
 except Exception as e:
     retriever = None

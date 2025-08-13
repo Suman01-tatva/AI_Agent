@@ -98,19 +98,19 @@ const Chatbot = () => {
         ]);
 
         // Step 2: Play bot reply via TTS
-        const ttsRes = await fetch("http://localhost:5000/tts", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: botReply, language }), // send language for TTS
-        });
+        // const ttsRes = await fetch("http://localhost:5000/tts", {
+        //   method: "POST",
+        //   headers: { "Content-Type": "application/json" },
+        //   body: JSON.stringify({ text: botReply, language }), // send language for TTS
+        // });
 
-        const ttsData = await ttsRes.json();
-        if (ttsData.audio) {
-          const audio = new Audio(`data:audio/mpeg;base64,${ttsData.audio}`);
-          audio.play();
-        } else {
-          console.error("TTS error:", ttsData.error || "Unknown error");
-        }
+        // const ttsData = await ttsRes.json();
+        // if (ttsData.audio) {
+        //   const audio = new Audio(`data:audio/mpeg;base64,${ttsData.audio}`);
+        //   audio.play();
+        // } else {
+        //   console.error("TTS error:", ttsData.error || "Unknown error");
+        // }
       } catch (err) {
         setMessages((prev) => [
           ...prev,

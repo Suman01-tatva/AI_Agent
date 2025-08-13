@@ -11,3 +11,4 @@ python-dotenv
 faiss-cpu
 bs4
 Pillow
+unstructured
