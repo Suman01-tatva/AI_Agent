@@ -5,14 +5,43 @@ const Chatbot = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [recording, setRecording] = useState(false);
+  const [showAttachMenu, setShowAttachMenu] = useState(false);
   const [language, setLanguage] = useState("en"); // 🌍 Selected language
   const chatRef = useRef();
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const silenceTimerRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
+  const fileInputRef = useRef(null);
 
   const SILENCE_TIMEOUT = 1500; // ms of silence before auto-stop
+
+  const FlagIcon = ({ country, className = "w-5 h-5" }) => {
+    const flags = {
+      us: "🇺🇸",
+      in: "🇮🇳",
+    };
+
+    return (
+      <span
+        className={`inline-flex items-center justify-center text-sm ${className}`}
+      >
+        {flags[country]}
+      </span>
+    );
+  };
+
+  const handleImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedImage(file);
+      setShowAttachMenu(false);
+    }
+  };
+
+  const removeSelectedImage = () => {
+    setSelectedImage(null);
+  };
 
   // Scroll chat to bottom
   useEffect(() => {
@@ -37,6 +66,7 @@ const Chatbot = () => {
     const formData = new FormData();
     formData.append("image", selectedImage);
     formData.append("prompt", input || "Describe this image");
+    formData.append("language", language);
 
     try {
       const res = await fetch("http://localhost:5000/image-chat", {
@@ -66,7 +96,7 @@ const Chatbot = () => {
 
   // 📤 Send message to chatbot + TTS
   const sendMessage = useCallback(
-    async (customInput) => {
+    async (customInput, speak = false) => {
       const messageToSend = customInput || input;
       if (!messageToSend.trim()) return;
 
@@ -97,20 +127,22 @@ const Chatbot = () => {
           { role: "model", parts: [{ text: botReply }] },
         ]);
 
-        // Step 2: Play bot reply via TTS
-        // const ttsRes = await fetch("http://localhost:5000/tts", {
-        //   method: "POST",
-        //   headers: { "Content-Type": "application/json" },
-        //   body: JSON.stringify({ text: botReply, language }), // send language for TTS
-        // });
+        // // Step 2: Play bot reply via TTS
+        if (speak) {
+          const ttsRes = await fetch("http://localhost:5000/tts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: botReply, language }), // send language for TTS
+          });
 
-        // const ttsData = await ttsRes.json();
-        // if (ttsData.audio) {
-        //   const audio = new Audio(`data:audio/mpeg;base64,${ttsData.audio}`);
-        //   audio.play();
-        // } else {
-        //   console.error("TTS error:", ttsData.error || "Unknown error");
-        // }
+          const ttsData = await ttsRes.json();
+          if (ttsData.audio) {
+            const audio = new Audio(`data:audio/mpeg;base64,${ttsData.audio}`);
+            audio.play();
+          } else {
+            console.error("TTS error:", ttsData.error || "Unknown error");
+          }
+        }
       } catch (err) {
         setMessages((prev) => [
           ...prev,
@@ -135,7 +167,7 @@ const Chatbot = () => {
       const sttData = await sttRes.json();
 
       if (sttData.transcript) {
-        sendMessage(sttData.transcript);
+        sendMessage(sttData.transcript, true);
       } else {
         console.error("STT error:", sttData.error || "No transcript");
       }
@@ -210,105 +242,297 @@ const Chatbot = () => {
   };
 
   return (
-    <div className="w-lg p-6 bg-gray-50 rounded-2xl shadow-lg font-sans max-w-xl mx-auto mt-10">
-      <h2 className="text-2xl font-semibold text-center mb-4">
-        🍽️ ITC Restaurant Chatbot
-      </h2>
-
-      {/* 🌍 Language selector */}
-      <div className="mb-4">
-        <label className="block mb-1 font-medium text-gray-700">
-          Select Language:
-        </label>
-        <select
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
-          className="p-2 border rounded-lg"
-        >
-          <option value="en">English</option>
-          <option value="hi">Hindi</option>
-          <option value="gu">Gujarati</option>
-        </select>
-      </div>
-
-      <div
-        ref={chatRef}
-        className="h-96 overflow-y-auto bg-white border border-gray-200 rounded-xl p-4 mb-4 space-y-4"
-      >
-        {messages.map((m, i) => (
-          <div
-            key={i}
-            className={`max-w-[80%] p-3 rounded-xl ${
-              m.role === "user"
-                ? "bg-blue-100 self-end ml-auto text-right"
-                : "bg-gray-200 self-start mr-auto text-left"
-            }`}
-          >
-            {m.parts.map((part, idx) =>
-              part.image ? (
-                <img
-                  key={idx}
-                  src={part.image}
-                  alt="User upload"
-                  className="rounded-lg max-w-full mt-2"
-                />
-              ) : (
-                <div key={idx} className="text-base text-gray-800">
-                  {parse(part.text)}
-                </div>
-              )
-            )}
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 p-4">
+      <div className="max-w-2xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full mb-2 shadow-lg">
+            <span className="text-2xl text-white">🍽️</span>
           </div>
-        ))}
-      </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+            ITC Restaurant
+          </h1>
+          <p className="text-gray-600 text-lg">Your culinary companion</p>
+        </div>
 
-      <div className="flex items-center gap-2 mb-2">
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setSelectedImage(e.target.files[0])}
-          className="flex-1 p-2 border rounded-lg text-sm"
-        />
-        {selectedImage && (
-          <button
-            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
-            onClick={sendImage}
+        {/* Main Chat Container */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+          {/* Language Selector */}
+          <div className="bg-gradient-to-r from-orange-500 to-red-500 p-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-white font-semibold text-lg">
+                Chat Assistant
+              </h2>
+              <div className="flex items-center gap-3">
+                <label className="text-white/90 font-medium text-sm">
+                  Language:
+                </label>
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className="bg-white/20 backdrop-blur-sm text-white border border-white/30 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-white/50 transition-all appearance-none cursor-pointer"
+                >
+                  <option
+                    value="en"
+                    className="text-gray-800 flex items-center"
+                  >
+                    English
+                  </option>
+                  <option value="hi" className="text-gray-800">
+                    हिंदी
+                  </option>
+                  <option value="gu" className="text-gray-800">
+                    ગુજરાતી
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Chat Messages */}
+          <div
+            ref={chatRef}
+            className="h-[32rem] overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-gray-50/50 to-white/50"
+            style={{ scrollbarWidth: "thin" }}
           >
-            Send Image
-          </button>
-        )}
+            {messages.map((m, i) => (
+              <div
+                key={i}
+                className={`flex ${
+                  m.role === "user" ? "justify-end" : "justify-start"
+                } animate-fade-in`}
+              >
+                <div
+                  className={`max-w-[75%] p-4 rounded-2xl shadow-lg ${
+                    m.role === "user"
+                      ? "bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-br-md"
+                      : "bg-white text-gray-800 rounded-bl-md border-2 border-orange-200 shadow-md"
+                  }`}
+                >
+                  {m.parts.map((part, idx) =>
+                    part.image ? (
+                      <img
+                        key={idx}
+                        src={part.image}
+                        alt="User upload"
+                        className="rounded-xl max-w-full shadow-md max-h-[16rem]"
+                      />
+                    ) : (
+                      <div key={idx} className="text-base leading-relaxed">
+                        {parse(part.text)}
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Input Area */}
+          <div className="p-6 pt-2 bg-white border-t border-gray-100 relative">
+            {/* Selected Image Preview */}
+            {selectedImage && (
+              <div className="absolute bottom-full left-6 right-6 mb-2 bg-gradient-to-r from-gray-50 to-orange-50 rounded-xl shadow-lg z-20">
+                <div className="p-1 rounded-lg bg-gradient-to-r from-orange-500 to-red-500">
+                  <div className="flex items-center justify-between bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 p-2 rounded">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={URL.createObjectURL(selectedImage)}
+                        alt="Selected"
+                        className="w-12 h-12 object-cover rounded-lg shadow-md"
+                      />
+                      <div>
+                        <p className="text-blue-700 font-medium text-sm">
+                          {selectedImage.name}
+                        </p>
+                        <p className="text-blue-600 text-xs">
+                          {(selectedImage.size / 1024).toFixed(1)} KB
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          sendImage();
+                          setSelectedImage(null); // Clear the selected image after sending
+                        }}
+                        className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg transition-colors shadow-sm"
+                      >
+                        Send
+                      </button>
+                      <button
+                        onClick={removeSelectedImage}
+                        className="px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white text-sm rounded-lg transition-colors shadow-sm"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Message Input with integrated controls */}
+            <div className="relative flex items-center gap-2">
+              {/* Attach Menu */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowAttachMenu(!showAttachMenu)}
+                  className="p-3 text-gray-500 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-all duration-200"
+                  title="Attach file"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                </button>
+
+                {/* Attach Menu Dropdown */}
+                {showAttachMenu && (
+                  <div className="absolute bottom-full left-0 mb-2 bg-white rounded-lg shadow-lg border border-gray-200 py-2 min-w-[160px] z-10">
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center gap-3 text-sm"
+                    >
+                      <span className="text-blue-500">📷</span>
+                      Upload Image
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Text Input */}
+              <div className="flex-1 relative">
+                <input
+                  type="text"
+                  className="w-full p-4 pr-16 border border-gray-200 rounded-2xl text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 shadow-sm"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Type your message here..."
+                  onKeyDown={(e) =>
+                    e.key === "Enter" &&
+                    !e.shiftKey &&
+                    (e.preventDefault(), sendMessage())
+                  }
+                />
+
+                {/* Voice Button inside input */}
+                <button
+                  className={`absolute right-3 top-1/2 transform -translate-y-1/2 p-2 rounded-full transition-all duration-200 ${
+                    recording
+                      ? "bg-red-500 text-white shadow-lg animate-pulse"
+                      : "text-gray-400 hover:text-orange-500 hover:bg-orange-50"
+                  }`}
+                  onClick={recording ? stopRecording : startRecording}
+                  title={recording ? "Stop Recording" : "Voice Input"}
+                >
+                  {recording ? (
+                    <div className="flex items-center justify-center">
+                      <div className="w-4 h-4 bg-white rounded-sm animate-pulse"></div>
+                    </div>
+                  ) : (
+                    <svg
+                      className="w-5 h-5"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                      <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+
+              {/* Send Button */}
+              <button
+                className="p-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-2xl font-medium transition-all duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => sendMessage()}
+                disabled={!input.trim() && !selectedImage}
+              >
+                <svg
+                  className="w-5 h-5 rotate-90"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                  />
+                </svg>
+              </button>
+
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageSelect}
+                className="hidden"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center mt-4 text-gray-500 text-sm">
+          <p>Powered by ITC Restaurant AI • Always here to help</p>
+        </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <input
-          type="text"
-          className="flex-1 p-3 border rounded-lg text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your message..."
-          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-        />
+      <style jsx="true">{`
+        .animate-fade-in {
+          animation: fadeIn 0.3s ease-out forwards;
+        }
+        
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
 
-        <button
-          className={`flex items-center gap-1 px-4 py-2 rounded-lg transition ${
-            recording ? "bg-red-600" : "bg-green-600"
-          } text-white hover:opacity-90`}
-          onClick={recording ? stopRecording : startRecording}
-          title={recording ? "Stop Recording" : "Start Recording"}
-        >
-          🎤
-          <span className="text-sm">
-            {recording ? "Recording..." : "Speak now"}
-          </span>
-        </button>
-
-        <button
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-          onClick={() => sendMessage()}
-        >
-          Send
-        </button>
-      </div>
+        /* Hide attach menu when clicking outside */
+        document.addEventListener('click', (e) => {
+          if (!e.target.closest('.attach-menu')) {
+            setShowAttachMenu(false);
+          }
+        });
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+          width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+          background: #f1f5f9;
+          border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+          background: linear-gradient(to bottom, #f97316, #dc2626);
+          border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(to bottom, #ea580c, #b91c1c);
+        }
+      `}</style>
     </div>
   );
 };

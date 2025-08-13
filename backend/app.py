@@ -13,7 +13,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 import hashlib
 import requests
 from bs4 import BeautifulSoup
-from langchain.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
 from io import BytesIO
@@ -24,8 +24,6 @@ import base64
 import re
 from langchain_community.document_loaders import RecursiveUrlLoader, UnstructuredURLLoader
 
-
-# Load environment variables
 load_dotenv()
 
 os.environ["LANGCHAIN_TRACING_V2"] = "false"
@@ -200,12 +198,12 @@ def image_chat():
 
     image_file = request.files["image"]
     filename = secure_filename(image_file.filename)
+    user_lang = request.form.get("language", "en")
 
     try:
         # Compress image
         compressed_bytes, mime_type = compress_image(image_file)
 
-        # Use image description directly to fetch vector store context
         model = genai.GenerativeModel("gemini-1.5-flash")
         image_desc = model.generate_content([
             "Briefly describe the key elements of this image (50 words).",
@@ -215,7 +213,6 @@ def image_chat():
             }
         ]).text.strip()
 
-        # Retrieve relevant hotel knowledge
         knowledge_context = retrieve_knowledge(image_desc)
 
         # Final single Gemini call with both image details + context
@@ -225,6 +222,7 @@ def image_chat():
             "give a short, accurate answer ONLY about this hotel. "
             "If unrelated, say: 'The image does not seem related to ITC Narmada Hotel.' "
             "Max 30 words, match user language.\n\n"
+            f"(Note: Always respond in **{user_lang}** only. Never switch languages.)\n\n"
             f"Image details: {image_desc}\n"
             f"Hotel knowledge: {knowledge_context}"
         )
@@ -239,14 +237,14 @@ def image_chat():
 @app.route("/chat", methods=["POST"])
 def chat():
     if graph is None:
-        return jsonify({"response": "❌ Chatbot is not available at the moment."}), 500
+        return jsonify({"response": "Chatbot is not available at the moment."}), 500
 
     data = request.get_json()
     user_input = data.get("message", "").strip()
-    user_lang = data.get("language", "en")  # Language code from frontend
+    user_lang = data.get("language", "en")
 
     if not user_input:
-        return jsonify({"error": "❗ No message provided"}), 400
+        return jsonify({"error": "No message provided"}), 400
 
     # Retrieve contextual knowledge
     knowledge_context = retrieve_knowledge(user_input)
@@ -262,7 +260,7 @@ def chat():
         result = graph.invoke({"messages": messages})
     except Exception as e:
         logging.error("LangGraph invocation failed:", exc_info=e)
-        return jsonify({"response": "❌ Something went wrong with the chatbot."})
+        return jsonify({"response": "Something went wrong with the chatbot."})
 
     response_text = ""
     if "messages" in result and result["messages"]:
@@ -280,8 +278,8 @@ def chat():
 ELEVEN_API_KEY = os.getenv("ELEVEN_API_KEY")
 VOICE_ID = os.getenv("ELEVEN_VOICE_ID")
 
-TTS_MODEL_ID = "eleven_multilingual_v2"  # TTS multilingual
-STT_MODEL_ID = "scribe_v1"  # STT multilingual
+TTS_MODEL_ID = "eleven_multilingual_v2" 
+STT_MODEL_ID = "scribe_v1"
 
 @app.route("/stt", methods=["POST"])
 def stt():
@@ -291,7 +289,7 @@ def stt():
     if "audio" not in request.files:
         return jsonify({"error": "No audio file uploaded"}), 400
 
-    user_lang = request.form.get("language", "en")  # Get from frontend form-data
+    user_lang = request.form.get("language", "en")
 
     try:
         audio_file = request.files["audio"]
@@ -300,7 +298,7 @@ def stt():
         headers = {"xi-api-key": ELEVEN_API_KEY}
         data = {
             "model_id": STT_MODEL_ID,
-            "language": user_lang  # Force STT to use the selected language
+            "language": user_lang 
         }
 
         files = {"file": (audio_file.filename, audio_file.stream, audio_file.mimetype)}
