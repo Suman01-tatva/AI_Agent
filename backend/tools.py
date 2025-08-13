@@ -15,7 +15,6 @@ from tools_utils import (
     get_user_slot,
     cancel_slot,
     update_slot,
-    time_slots,
 )
 
 # --- Input Schemas ---
@@ -70,7 +69,7 @@ def Create_User_Details(name: str, contact: str, time: str, guests: int, date: s
 
 @tool(args_schema=ReservationInput)
 def Save_Reservation(name: str, contact: str, time: str, guests: int, date: str) -> str:
-    """Save a reservation if the selected slot is available."""
+    """Save a reservation if the selected slot is available, and take time slot of one hour."""
     if is_slot_available(date, time):
         return insert_booking(name, contact, time, guests, date)
     return f"❌ Sorry, booking is full or the slot at {time} on {date} is already booked. Try another time."
@@ -81,11 +80,7 @@ def Check_Slot_Availability(date: str, time: Optional[str] = None) -> str:
     if time:
         if is_slot_available(date, time):
             return f"✅ Slot available at {time} on {date}."
-        return f"❌ Booking full or slot not available on {date}."
-    
-    available = [t for t in time_slots if is_slot_available(date, t)]
-    if available:
-        return f"✅ Available slots on {date}: {', '.join(available)}"
+        return f"❌ Booking full or slot not available on {date, time}."
     return f"❌ Booking full or no available slots on {date}."
 
 @tool(args_schema=RetrieveInput)
@@ -114,9 +109,9 @@ class Cancel_Reservation(BaseTool):
     def _run(self, slot_id: int) -> str:
         return cancel_slot(slot_id)
 
-class Update_Booking_Time(BaseTool):
+class Update_Booking(BaseTool):
     """Update the time and details of an existing reservation."""
-    name: ClassVar[str] = "Update_Booking_Time"
+    name: ClassVar[str] = "Update_Booking"
     description: ClassVar[str] = "Update a reservation with new details"
     args_schema: ClassVar[type[BaseModel]] = UpdateBookingInput
 
@@ -130,6 +125,6 @@ all_tools = [
     Check_Slot_Availability,
     Retrieve_User_Bookings,
     Cancel_Reservation(),
-    Update_Booking_Time(),
+    Update_Booking(),
 ]
  

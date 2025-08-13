@@ -13,7 +13,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 import hashlib
 import requests
 from bs4 import BeautifulSoup
-from langchain.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
 from io import BytesIO
@@ -21,8 +21,9 @@ from PIL import Image
 import google.generativeai as genai
 import os
 import base64
+import re
+from langchain_community.document_loaders import RecursiveUrlLoader, UnstructuredURLLoader
 
-# Load environment variables
 load_dotenv()
 
 os.environ["LANGCHAIN_TRACING_V2"] = "false"
@@ -32,18 +33,20 @@ app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "secret-key")
 CORS(app, supports_credentials=True)
 
+JSON_PATH = os.path.join(os.path.dirname(__file__), "restaurant-data.json")
+PDF_PATH = os.path.join(os.path.dirname(__file__), "restaurant_menu.pdf")
+
 # Load knowledge file
 try:
-    with open("restaurant-data.json", "r") as f:
+    with open(JSON_PATH, "r") as f:
         knowledge = json.load(f)
 except Exception as e:
     knowledge = {}
     logging.error("Failed to load knowledge base:", exc_info=e)
 
 # --- Knowledge Embedding (with Cache) ---
-FAISS_STORE_DIR = "faiss_store"
+FAISS_STORE_DIR = os.path.join(os.path.dirname(__file__), "faiss_store")
 HASH_FILE_PATH = os.path.join(FAISS_STORE_DIR, "data.hash")
-JSON_PATH = "restaurant-data.json"
 
 def json_to_documents(json_data: dict) -> list[Document]:
     documents = []
@@ -56,11 +59,51 @@ def json_to_documents(json_data: dict) -> list[Document]:
         )
     return documents
 
-def scrape_website(url):
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, "html.parser")
-    text = soup.get_text()
-    return text
+def scrape_website(url: str) -> list[Document]:
+    def clean_content(html: str) -> str:
+        try:
+            soup = BeautifulSoup(html, "html.parser")
+            # Remove scripts, styles, nav, footer, header
+            for element in soup(["script", "style", "nav", "footer", "header"]):
+                element.decompose()
+            text = soup.get_text(separator=" ", strip=True)
+            text = re.sub(r"\s+", " ", text).strip()
+            return text
+        except Exception:
+            return ""
+
+    def url_filter(url: str, visited: set) -> bool:
+        if url in visited:
+            return False
+        exclude_patterns = [
+            r".*\.(jpg|png|gif|jpeg|css|js|woff|woff2|ttf|ico|svg)$",
+            r".*/(login|signup|admin|cart|checkout).*",
+        ]
+        return not any(re.match(pattern, url) for pattern in exclude_patterns)
+
+    visited_urls = set()
+
+    try:
+        # Step 1: Crawl for URLs
+        crawler = RecursiveUrlLoader(url=url, prevent_outside=True)
+        pages = crawler.load()
+
+        # Step 2: Filter URLs
+        filtered_urls = []
+        for page in pages:
+            source_url = page.metadata.get("source", url)
+            if url_filter(source_url, visited_urls):
+                visited_urls.add(source_url)
+                filtered_urls.append(source_url)
+
+        # Step 3: Load cleaned content for filtered URLs
+        loader = UnstructuredURLLoader(urls=filtered_urls, extractor=clean_content)
+        raw_docs = loader.load()
+        return [doc for doc in raw_docs if len(doc.page_content.strip()) > 50]
+
+    except Exception as e:
+        print(f"Error scraping {url}: {e}")
+        return []
 
 def pdf_to_document(pdf_path: str) -> list[Document]:
     pdf_loader = PyPDFLoader(pdf_path)
@@ -89,15 +132,11 @@ try:
 
     if current_hash != stored_hash or not os.path.exists(os.path.join(FAISS_STORE_DIR, "index.faiss")):
         logging.info("🔄 Rebuilding FAISS vector store...")
-        documents = json_to_documents(knowledge)
-        scraped_text = scrape_website(os.getenv("SITE_URL"))
-        scraped_doc = Document(
-            page_content=scraped_text,
-            metadata={"source": "itchotels.com", "type": "scraped"}
-        )
-        documents.append(scraped_doc)
-        documents.extend(pdf_to_document("./restaurant_menu.pdf"))
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+        documents = []
+        documents.extend(json_to_documents(knowledge))
+        documents.extend(scrape_website(os.getenv("SITE_URL")))
+        documents.extend(pdf_to_document(PDF_PATH))
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=700, chunk_overlap=80)
         chunks = text_splitter.split_documents(documents)
         vector_store = FAISS.from_documents(chunks, embeddings)
         vector_store.save_local(FAISS_STORE_DIR)
@@ -112,7 +151,7 @@ try:
         )
         logging.info("✅ Loaded FAISS vector store from disk.")
 
-    retriever = vector_store.as_retriever(search_kwargs={"k": 3})
+    retriever = vector_store.as_retriever(search_kwargs={"k": 5})
 
 except Exception as e:
     retriever = None
@@ -159,12 +198,12 @@ def image_chat():
 
     image_file = request.files["image"]
     filename = secure_filename(image_file.filename)
+    user_lang = request.form.get("language", "en")
 
     try:
         # Compress image
         compressed_bytes, mime_type = compress_image(image_file)
 
-        # Use image description directly to fetch vector store context
         model = genai.GenerativeModel("gemini-1.5-flash")
         image_desc = model.generate_content([
             "Briefly describe the key elements of this image (50 words).",
@@ -174,7 +213,6 @@ def image_chat():
             }
         ]).text.strip()
 
-        # Retrieve relevant hotel knowledge
         knowledge_context = retrieve_knowledge(image_desc)
 
         # Final single Gemini call with both image details + context
@@ -184,6 +222,7 @@ def image_chat():
             "give a short, accurate answer ONLY about this hotel. "
             "If unrelated, say: 'The image does not seem related to ITC Narmada Hotel.' "
             "Max 30 words, match user language.\n\n"
+            f"(Note: Always respond in **{user_lang}** only. Never switch languages.)\n\n"
             f"Image details: {image_desc}\n"
             f"Hotel knowledge: {knowledge_context}"
         )
@@ -198,14 +237,14 @@ def image_chat():
 @app.route("/chat", methods=["POST"])
 def chat():
     if graph is None:
-        return jsonify({"response": "❌ Chatbot is not available at the moment."}), 500
+        return jsonify({"response": "Chatbot is not available at the moment."}), 500
 
     data = request.get_json()
     user_input = data.get("message", "").strip()
-    user_lang = data.get("language", "en")  # Language code from frontend
+    user_lang = data.get("language", "en")
 
     if not user_input:
-        return jsonify({"error": "❗ No message provided"}), 400
+        return jsonify({"error": "No message provided"}), 400
 
     # Retrieve contextual knowledge
     knowledge_context = retrieve_knowledge(user_input)
@@ -221,7 +260,7 @@ def chat():
         result = graph.invoke({"messages": messages})
     except Exception as e:
         logging.error("LangGraph invocation failed:", exc_info=e)
-        return jsonify({"response": "❌ Something went wrong with the chatbot."})
+        return jsonify({"response": "Something went wrong with the chatbot."})
 
     response_text = ""
     if "messages" in result and result["messages"]:
@@ -239,8 +278,8 @@ def chat():
 ELEVEN_API_KEY = os.getenv("ELEVEN_API_KEY")
 VOICE_ID = os.getenv("ELEVEN_VOICE_ID")
 
-TTS_MODEL_ID = "eleven_multilingual_v2"  # TTS multilingual
-STT_MODEL_ID = "scribe_v1"  # STT multilingual
+TTS_MODEL_ID = "eleven_multilingual_v2" 
+STT_MODEL_ID = "scribe_v1"
 
 @app.route("/stt", methods=["POST"])
 def stt():
@@ -250,7 +289,7 @@ def stt():
     if "audio" not in request.files:
         return jsonify({"error": "No audio file uploaded"}), 400
 
-    user_lang = request.form.get("language", "en")  # Get from frontend form-data
+    user_lang = request.form.get("language", "en")
 
     try:
         audio_file = request.files["audio"]
@@ -259,7 +298,7 @@ def stt():
         headers = {"xi-api-key": ELEVEN_API_KEY}
         data = {
             "model_id": STT_MODEL_ID,
-            "language": user_lang  # Force STT to use the selected language
+            "language": user_lang 
         }
 
         files = {"file": (audio_file.filename, audio_file.stream, audio_file.mimetype)}
