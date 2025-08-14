@@ -70,22 +70,22 @@ def Create_User_Details(name: str, contact: str, time: str, guests: int, date: s
 @tool(args_schema=ReservationInput)
 def Save_Reservation(name: str, contact: str, time: str, guests: int, date: str) -> str:
     """Save a reservation if the selected slot is available, and take time slot of one hour."""
-    is_slot_available = is_slot_available(date, time)
-    if is_slot_available is None:
+    slot_status = is_slot_available(date, time)
+    if slot_status is None:
         return "ℹ️ Unable to check availability at the moment. Please try again later."
-    elif is_slot_available:
+    elif slot_status:
         return insert_booking(name, contact, time, guests, date)
     return f"Sorry, booking is full or the slot at {time} on {date} is already booked. Try another time."
 
 @tool(args_schema=DateInput)
 def Check_Slot_Availability(date: str, time: Optional[str] = None) -> str:
     """Check whether a time slot is available on a specific date."""
-    is_slot_available = is_slot_available(date, time)
-    if is_slot_available is None:
+    slot_status = is_slot_available(date, time)
+    if slot_status is None:
         return "ℹ️ Unable to check availability at the moment. Please try again later."
-    elif is_slot_available:
+    elif slot_status:
         return f"Slot available at {time} on {date}."
-    elif is_slot_available is False:
+    elif slot_status is False:
         return f"Booking full or slot not available on {date, time}."
 
 @tool(args_schema=RetrieveInput)
