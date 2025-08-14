@@ -251,6 +251,7 @@ def chat():
     final_input = (
         f"{user_input}\n\n"
         f"(Note: Always respond in **{user_lang}** only. Never switch languages.)\n\n"
+        "(Note: Wrap responses in HTML tags (<div>, <p>, <li>, etc.) but do not include <html> or triple backticks (```).)"
         f"Context (if any):\n{knowledge_context}"
     )
 

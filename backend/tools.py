@@ -58,30 +58,35 @@ class RetrieveInput(BaseModel):
 def Create_User_Details(name: str, contact: str, time: str, guests: int, date: str) -> str:
     """Collect booking details before confirmation."""
     return (
-        f"📋 Booking details:\n"
-        f"👤 Name: {name}\n"
-        f"📞 Contact: {contact}\n"
-        f"📅 Date: {date}\n"
-        f"⏰ Time: {time}\n"
-        f"👥 Guests: {guests}\n"
-        f"👉 Reply with 'Yes' to confirm or update the details."
+        f"Booking details:\n"
+        f"Name: {name}\n"
+        f"Contact: {contact}\n"
+        f"Date: {date}\n"
+        f"Time: {time}\n"
+        f"Guests: {guests}\n"
+        f"Reply with 'Yes' to confirm or update the details."
     )
 
 @tool(args_schema=ReservationInput)
 def Save_Reservation(name: str, contact: str, time: str, guests: int, date: str) -> str:
     """Save a reservation if the selected slot is available, and take time slot of one hour."""
-    if is_slot_available(date, time):
+    is_slot_available = is_slot_available(date, time)
+    if is_slot_available is None:
+        return "ℹ️ Unable to check availability at the moment. Please try again later."
+    elif is_slot_available:
         return insert_booking(name, contact, time, guests, date)
-    return f"❌ Sorry, booking is full or the slot at {time} on {date} is already booked. Try another time."
+    return f"Sorry, booking is full or the slot at {time} on {date} is already booked. Try another time."
 
 @tool(args_schema=DateInput)
 def Check_Slot_Availability(date: str, time: Optional[str] = None) -> str:
     """Check whether a time slot is available on a specific date."""
-    if time:
-        if is_slot_available(date, time):
-            return f"✅ Slot available at {time} on {date}."
-        return f"❌ Booking full or slot not available on {date, time}."
-    return f"❌ Booking full or no available slots on {date}."
+    is_slot_available = is_slot_available(date, time)
+    if is_slot_available is None:
+        return "ℹ️ Unable to check availability at the moment. Please try again later."
+    elif is_slot_available:
+        return f"Slot available at {time} on {date}."
+    elif is_slot_available is False:
+        return f"Booking full or slot not available on {date, time}."
 
 @tool(args_schema=RetrieveInput)
 def Retrieve_User_Bookings(name: Optional[str] = None, contact: Optional[str] = None) -> str:
@@ -90,11 +95,11 @@ def Retrieve_User_Bookings(name: Optional[str] = None, contact: Optional[str] = 
     if isinstance(result, str):
         return result
     if not result:
-        return "ℹ️ No active bookings found."
+        return "No active bookings found."
     
-    response_lines = ["📖 Your Reservations:"]
+    response_lines = ["Your Reservations:"]
     for slot in result:
-        status = "✅ Active" if slot.get("isActive", True) else "❌ Cancelled"
+        status = "Active" if slot.get("isActive", True) else "Cancelled"
         response_lines.append(
             f"- ID #{slot.get('id')} | {slot.get('bookingDate')} at {slot.get('bookingTime')} | Guests: {slot.get('noOfPeople')} | {status}"
         )
