@@ -419,6 +419,7 @@ const Chatbot = () => {
                     !e.shiftKey &&
                     (e.preventDefault(), sendMessage())
                   }
+                  autoFocus
                 />
 
                 {/* Voice Button inside input */}
