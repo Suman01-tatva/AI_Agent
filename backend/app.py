@@ -198,7 +198,6 @@ def image_chat():
 
     image_file = request.files["image"]
     filename = secure_filename(image_file.filename)
-    user_lang = request.form.get("language", "en")
 
     try:
         # Compress image
@@ -222,7 +221,7 @@ def image_chat():
             "give a short, accurate answer ONLY about this hotel. "
             "If unrelated, say: 'The image does not seem related to ITC Narmada Hotel.' "
             "Max 30 words, match user language.\n\n"
-            f"(Note: Always respond in **{user_lang}** only. Never switch languages.)\n\n"
+            f"(Note: Always respond in user's input language.)\n\n"
             f"Image details: {image_desc}\n"
             f"Hotel knowledge: {knowledge_context}"
         )
@@ -241,7 +240,6 @@ def chat():
 
     data = request.get_json()
     user_input = data.get("message", "").strip()
-    user_lang = data.get("language", "en")
 
     if not user_input:
         return jsonify({"error": "No message provided"}), 400
@@ -250,7 +248,7 @@ def chat():
     knowledge_context = retrieve_knowledge(user_input)
     final_input = (
         f"{user_input}\n\n"
-        f"(Note: Always respond in **{user_lang}** only. Never switch languages.)\n\n"
+        f"(Note: Always respond in user's input language.)\n\n"
         "(Note: Wrap responses in HTML tags (<div>, <p>, <li>, etc.) but do not include <html> or triple backticks (```).)"
         f"Context (if any):\n{knowledge_context}"
     )
@@ -273,7 +271,7 @@ def chat():
         else:
             response_text = str(last_msg)
 
-    return jsonify({"response": response_text, "language": user_lang})
+    return jsonify({"response": response_text})
 
 
 ELEVEN_API_KEY = os.getenv("ELEVEN_API_KEY")
@@ -290,7 +288,7 @@ def stt():
     if "audio" not in request.files:
         return jsonify({"error": "No audio file uploaded"}), 400
 
-    user_lang = request.form.get("language", "en")
+    user_lang = request.form.get("language")
 
     try:
         audio_file = request.files["audio"]
@@ -299,8 +297,9 @@ def stt():
         headers = {"xi-api-key": ELEVEN_API_KEY}
         data = {
             "model_id": STT_MODEL_ID,
-            "language": user_lang 
         }
+        if user_lang:
+            data["language_code"] = user_lang
 
         files = {"file": (audio_file.filename, audio_file.stream, audio_file.mimetype)}
 
@@ -319,7 +318,7 @@ def stt():
 
         result = response.json()
         transcript = result.get("text", "").strip()
-        return jsonify({"transcript": transcript, "language": user_lang})
+        return jsonify({"transcript": transcript})
 
     except Exception as e:
         logging.error("STT error:", exc_info=e)
@@ -332,7 +331,7 @@ def tts():
 
     data = request.get_json()
     text = data.get("text", "").strip()
-    user_lang = data.get("language", "en")  # From frontend
+    user_lang = data.get("language")  # From frontend
 
     if not text:
         return jsonify({"error": "No text provided"}), 400
@@ -343,8 +342,9 @@ def tts():
             "text": text,
             "model_id": TTS_MODEL_ID,
             "voice_settings": {"stability": 0.5, "similarity_boost": 0.8},
-            "language": user_lang  # Ensure TTS uses the selected language
         }
+        if user_lang:
+            payload["language_code"] = user_lang
         headers = {
             "Accept": "audio/mpeg",
             "Content-Type": "application/json",

@@ -9,6 +9,7 @@ google-generativeai
 psycopg2-binary
 python-dotenv
 faiss-cpu
+pypdf
 bs4
 Pillow
 unstructured

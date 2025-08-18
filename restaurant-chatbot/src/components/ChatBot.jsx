@@ -55,10 +55,7 @@ const Chatbot = () => {
 
     const imageMessage = {
       role: "user",
-      parts: [
-        { text: input },
-        { image: URL.createObjectURL(selectedImage) },
-      ],
+      parts: [{ text: input }, { image: URL.createObjectURL(selectedImage) }],
     };
     setMessages((prev) => [...prev, imageMessage]);
     setInput("");
@@ -66,7 +63,6 @@ const Chatbot = () => {
     const formData = new FormData();
     formData.append("image", selectedImage);
     formData.append("prompt", input || "Describe this image");
-    formData.append("language", language);
 
     try {
       const res = await fetch("http://localhost:5000/image-chat", {
@@ -109,7 +105,7 @@ const Chatbot = () => {
         const response = await fetch("http://localhost:5000/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: messageToSend, language }), // send selected language
+          body: JSON.stringify({ message: messageToSend }),
         });
 
         const data = await response.json();
@@ -128,21 +124,21 @@ const Chatbot = () => {
         ]);
 
         // // Step 2: Play bot reply via TTS
-        if (speak) {
-          const ttsRes = await fetch("http://localhost:5000/tts", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text: botReply, language }), // send language for TTS
-          });
+        // if (speak) {
+        //   const ttsRes = await fetch("http://localhost:5000/tts", {
+        //     method: "POST",
+        //     headers: { "Content-Type": "application/json" },
+        //     body: JSON.stringify({ text: botReply, language }), // send language for TTS
+        //   });
 
-          const ttsData = await ttsRes.json();
-          if (ttsData.audio) {
-            const audio = new Audio(`data:audio/mpeg;base64,${ttsData.audio}`);
-            audio.play();
-          } else {
-            console.error("TTS error:", ttsData.error || "Unknown error");
-          }
-        }
+        //   const ttsData = await ttsRes.json();
+        //   if (ttsData.audio) {
+        //     const audio = new Audio(`data:audio/mpeg;base64,${ttsData.audio}`);
+        //     audio.play();
+        //   } else {
+        //     console.error("TTS error:", ttsData.error || "Unknown error");
+        //   }
+        // }
       } catch (err) {
         setMessages((prev) => [
           ...prev,
@@ -179,7 +175,13 @@ const Chatbot = () => {
   // 🎤 Start recording audio for STT
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
       mediaRecorderRef.current = new MediaRecorder(stream);
       audioChunksRef.current = [];
 
@@ -247,7 +249,7 @@ const Chatbot = () => {
         {/* Header */}
         <div className="text-center mb-4">
           <div className="inline-flex items-center justify-center mt-3 bg-gradient-to-b from-gray-50 to-white mb-2 p-2 rounded px-3 shadow-lg">
-            <img src="ITC-Hotels-logo.svg" alt=""/>
+            <img src="ITC-Hotels-logo.svg" alt="" />
           </div>
         </div>
 
@@ -261,16 +263,19 @@ const Chatbot = () => {
               </h2>
               <div className="flex items-center gap-3">
                 <label className="text-white/90 font-medium text-sm">
-                  Language:
+                  Speech Language:
                 </label>
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
                   className="bg-white/20 backdrop-blur-sm text-white border border-white/30 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-white/50 transition-all appearance-none cursor-pointer"
                 >
+                  <option value="" className="text-gray-800 flex items-center">
+                    Auto detect
+                  </option>
                   <option
                     value="en"
-                    className="text-gray-800 flex items-center"
+                    className="text-gray-800"
                   >
                     English
                   </option>
