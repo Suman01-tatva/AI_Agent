@@ -40,7 +40,8 @@ def is_slot_available(date: str, time: Optional[str] = None) -> bool:
         if response.status_code != 200:
             print(f"API request failed with status {response.status_code}")
             return False
-
+        elif response.status_code == 500:
+            return None
         slots = response.json()
         if time:
             booked_times = [

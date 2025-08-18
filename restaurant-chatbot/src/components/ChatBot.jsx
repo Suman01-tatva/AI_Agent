@@ -56,7 +56,7 @@ const Chatbot = () => {
     const imageMessage = {
       role: "user",
       parts: [
-        { text: input || "Image uploaded" },
+        { text: input },
         { image: URL.createObjectURL(selectedImage) },
       ],
     };
@@ -242,17 +242,13 @@ const Chatbot = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br p-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-4">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full mb-2 shadow-lg">
-            <span className="text-2xl text-white">🍽️</span>
+          <div className="inline-flex items-center justify-center mt-3 bg-gradient-to-b from-gray-50 to-white mb-2 p-2 rounded px-3 shadow-lg">
+            <img src="ITC-Hotels-logo.svg" alt=""/>
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-            ITC Restaurant
-          </h1>
-          <p className="text-gray-600 text-lg">Your culinary companion</p>
         </div>
 
         {/* Main Chat Container */}
@@ -486,7 +482,7 @@ const Chatbot = () => {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-4 text-gray-500 text-sm">
+        <div className="text-center mt-4 text-gray-300 text-sm">
           <p>Powered by ITC Restaurant AI • Always here to help</p>
         </div>
       </div>

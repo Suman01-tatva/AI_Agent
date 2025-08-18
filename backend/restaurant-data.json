@@ -1,11 +1,12 @@
 {
   "restaurant": {
     "name": "ITC Narmada Hotel and Restaurant",
+    "location": "Judges  Bungalow  Rd,  Vastrapur, Ahmedabad, Gujarat - 380015",
     "contact": {
-      "phone": "+91-9876543210",
-      "email": "itc.restaurant@example.com"
+      "phone": "+91 7969664000",
+      "email": "reservations@itchotels.in"
     },
-    "website": "www.itcrestaurant.in",
+    "website": "https://www.itchotels.com/in/en/itcnarmada-ahmedabad",
     "cuisine": ["Indian", "Chinese", "Continental"],
     "ambience": "Casual Dining with air-conditioned indoor and outdoor seating"
   },
