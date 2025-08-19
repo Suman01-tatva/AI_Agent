@@ -23,6 +23,7 @@ import os
 import base64
 import re
 from langchain_community.document_loaders import RecursiveUrlLoader, UnstructuredURLLoader
+from tavily import TavilyClient
 
 load_dotenv()
 
@@ -47,6 +48,22 @@ except Exception as e:
 # --- Knowledge Embedding (with Cache) ---
 FAISS_STORE_DIR = os.path.join(os.path.dirname(__file__), "faiss_store")
 HASH_FILE_PATH = os.path.join(FAISS_STORE_DIR, "data.hash")
+
+tavily = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
+
+def tavily_search(query: str):
+    try:
+        results = tavily.search(
+            query=query,
+            search_depth="advanced",
+            max_results=3
+        )
+        if results and "results" in results:
+            best = results["results"][0]
+            return f"{best['title']}\n{best['url']}\n{best['content'][:400]}..."
+        return ""
+    except Exception as e:
+        return ""
 
 def json_to_documents(json_data: dict) -> list[Document]:
     documents = []
@@ -85,7 +102,7 @@ def scrape_website(url: str) -> list[Document]:
 
     try:
         # Step 1: Crawl for URLs
-        crawler = RecursiveUrlLoader(url=url, prevent_outside=True)
+        crawler = RecursiveUrlLoader(url=url, prevent_outside=False)
         pages = crawler.load()
 
         # Step 2: Filter URLs
@@ -159,12 +176,23 @@ except Exception as e:
 
 # --- Knowledge Retrieval ---
 def retrieve_knowledge(query: str) -> str:
+    faiss_result = ""
+    # tavily_result = ""
+
     try:
-        docs = retriever.invoke(query) if retriever else []
-        return "\n".join([doc.page_content for doc in docs]) if docs else ""
+        docs_and_scores = vector_store.similarity_search_with_score(query, k=5)
+        good_docs = [doc.page_content for doc, score in docs_and_scores if score > 0.7]
+        if good_docs:
+            faiss_result = "\n".join(good_docs)
     except Exception as e:
-        logging.error("Knowledge retrieval error:", exc_info=e)
-        return ""
+        logging.error("FAISS retrieval error", exc_info=e)
+
+    # try:
+    #     tavily_result = tavily_search(query)
+    # except Exception as e:
+    #     logging.error("Tavily search failed", exc_info=e)
+
+    return (faiss_result).strip()
 
 # Build LangGraph once at startup
 graph = build_chat_graph()
