@@ -47,6 +47,8 @@ except Exception as e:
 # --- Knowledge Embedding (with Cache) ---
 FAISS_STORE_DIR = os.path.join(os.path.dirname(__file__), "faiss_store")
 HASH_FILE_PATH = os.path.join(FAISS_STORE_DIR, "data.hash")
+IMAGE_DIR = os.path.join(os.path.dirname(__file__),"scraped_images")
+os.makedirs(IMAGE_DIR, exist_ok=True)
 
 def json_to_documents(json_data: dict) -> list[Document]:
     documents = []
@@ -76,12 +78,13 @@ def scrape_website(url: str) -> list[Document]:
         if url in visited:
             return False
         exclude_patterns = [
-            r".*\.(jpg|png|gif|jpeg|css|js|woff|woff2|ttf|ico|svg)$",
+            r".*\.(jpg|png|gif|jpeg|css|js|woff|woff2|ttf|ico|svg|webp)$",
             r".*/(login|signup|admin|cart|checkout).*",
         ]
         return not any(re.match(pattern, url) for pattern in exclude_patterns)
 
     visited_urls = set()
+    documents = []
 
     try:
         # Step 1: Crawl for URLs
@@ -96,14 +99,58 @@ def scrape_website(url: str) -> list[Document]:
                 visited_urls.add(source_url)
                 filtered_urls.append(source_url)
 
-        # Step 3: Load cleaned content for filtered URLs
+        # Step 3: Load cleaned text content
         loader = UnstructuredURLLoader(urls=filtered_urls, extractor=clean_content)
         raw_docs = loader.load()
-        return [doc for doc in raw_docs if len(doc.page_content.strip()) > 50]
+        text_docs = [doc for doc in raw_docs if len(doc.page_content.strip()) > 50]
+        documents.extend(text_docs)
+
+        # Step 4: Extract and save images
+        for page_url in filtered_urls:
+            try:
+                resp = requests.get(page_url, timeout=10)
+                soup = BeautifulSoup(resp.text, "html.parser")
+                img_tags = soup.find_all("img")
+
+                for idx, img in enumerate(img_tags):
+                    img_url = img.get("src")
+                    if not img_url:
+                        continue
+                    if not img_url.startswith("http"):
+                        img_url = requests.compat.urljoin(page_url, img_url)
+
+                    # Skip unwanted extensions
+                    if not re.search(r"\.(jpg|jpeg|png|gif|webp)$", img_url, re.IGNORECASE):
+                        continue
+
+                    try:
+                        img_data = requests.get(img_url, timeout=10).content
+                        img_name = f"{hash(img_url)}.jpg"
+                        img_path = os.path.join(IMAGE_DIR, img_name)
+
+                        with open(img_path, "wb") as f:
+                            f.write(img_data)
+
+                        # Convert image to base64 string for embedding
+                        img_base64 = base64.b64encode(img_data).decode("utf-8")
+                        doc = Document(
+                            page_content=f"[IMAGE] base64:{img_base64[:200]}... (truncated)",
+                            metadata={"source": page_url, "image_url": img_url, "type": "image"}
+                        )
+                        documents.append(doc)
+
+                    except Exception as e:
+                        print(f"⚠️ Error saving image {img_url}: {e}")
+                        continue
+
+            except Exception as e:
+                print(f"⚠️ Failed to scrape images from {page_url}: {e}")
+
+        return documents
 
     except Exception as e:
         print(f"Error scraping {url}: {e}")
-        return []
+        return documents
 
 def pdf_to_document(pdf_path: str) -> list[Document]:
     pdf_loader = PyPDFLoader(pdf_path)
