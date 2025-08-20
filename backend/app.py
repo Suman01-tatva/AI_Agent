@@ -11,6 +11,7 @@ from PIL import Image
 import google.generativeai as genai
 import os
 import base64
+import re
 
 load_dotenv()
 
@@ -116,8 +117,12 @@ def chat():
         return jsonify({"response": "Something went wrong with the chatbot."})
 
     final_response = result["messages"][-1].content
+    # --- Post-process: Remove Markdown/code fences and triple backticks ---
+    if isinstance(final_response, str):
+        final_response = re.sub(r"^```[a-zA-Z]*\s*", "", final_response.strip())  # remove ```html, ```markdown etc.
+        final_response = re.sub(r"```$", "", final_response)  # remove trailing ``` 
 
-    return jsonify({"response": final_response, "language": user_lang})
+    return jsonify({"response": final_response})
 
 
 ELEVEN_API_KEY = os.getenv("ELEVEN_API_KEY")

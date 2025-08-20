@@ -5,8 +5,7 @@ from datetime import date
 from dotenv import load_dotenv
 
 from tools_utils import (
-    insert_booking,
-    is_slot_available,
+    check_and_save_slot,
     get_user_slot,
     cancel_slot,
     update_slot,
@@ -17,62 +16,44 @@ today_str = date.today().isoformat()
 
 # --- Input Schemas ---
 class ReservationInput(BaseModel):
-    """Input schema for creating or saving a reservation."""
     name: str = Field(..., description="Name of the user, e.g., John, Suman")
-    contact: str = Field(..., min_length=10, max_length=13,description="Contact number of the user, e.g., +91-1234567890")
-    time: str = Field(..., description="Time in HH:MM:SS format, use 'retriever_tool' for opening hours must be between restaurant opening hours")
+    contact: str = Field(..., min_length=10, max_length=10, description="10-digit contact number, digits only (e.g., 9876543210)")
+    time: str = Field(..., description="Convert time in HH:MM:SS format, must be between restaurant opening hours")
     guests: int = Field(..., gt=0, description="Number of people, > 0")
     date: str = Field(..., description=f"Date in YYYY-MM-DD format, > {today_str}")
 
 class CancelInput(BaseModel):
-    """Input schema for cancelling a reservation by ID."""
     slot_id: int = Field(...,gt=0, description="ID of the booking to cancel, must be greater than 0")
 
 class UpdateBookingInput(BaseModel):
-    """Input schema for updating a booking."""
     id: int
     bookingName: str = Field(..., description="Name of the user, e.g., John, Suman")
-    contactNumber: str = Field(..., min_length=10, max_length=13,description="Contact number of the user, e.g., +91-1234567890")
+    contactNumber: str = Field(..., min_length=10, max_length=10,description="10-digit contact number, digits only (e.g., 9876543210)")
     bookingDate: str = Field(..., description=f"Date in YYYY-MM-DD format, > {today_str}")
-    bookingTime: str = Field(..., description="Time in HH:MM:SS format, must be between restaurant opening hours")
+    bookingTime: str = Field(..., description="Convert time in HH:MM:SS format, must be between restaurant opening hours")
     noOfPeople: int = Field(..., gt=0, description="Number of people, > 0")
 
 class RetrieveInput(BaseModel):
-    """Input schema for retrieving bookings using optional name or contact."""
     name: Optional[str] = Field(..., description="Name of the user, e.g., John, Suman")
-    contact: Optional[str] = Field(..., min_length=10, max_length=13,description="Contact number of the user, e.g., +91-1234567890")
+    contact: Optional[str] = Field(..., min_length=10, max_length=10,description="10-digit contact number, digits only (e.g., 9876543210)")
 
 # --- Tools ---  
 
 @tool(args_schema=ReservationInput)
 def Save_Reservation(name: str, contact: str, time: str, guests: int, date: str) -> str:
-    """Save a reservation if the selected slot is available, and take time slot of one hour."""
-    slot_status = is_slot_available(date, time)
-    if slot_status is None:
-        return "ℹ️ Unable to check availability at the moment. Please try again later."
-    elif slot_status:
-        return insert_booking(name, contact, time, guests, date)
-    return f"Sorry, booking is full or the slot at {time} on {date} is already booked. Try another time."
+    """
+    Save a reservation if the selected slot is available, and take time slot of one hour.
+    Validates input before making the booking.
+    """
+    return check_and_save_slot(name, contact, time, guests, date)
 
 @tool(args_schema=RetrieveInput)
-def Retrieve_User_Bookings(name: Optional[str] = None, contact: Optional[str] = None) -> str:
-    """Retrieve all active or cancelled bookings for a user using name or contact."""
-    result = get_user_slot(name=name, contact=contact)
-    if isinstance(result, str):
-        return result
-    if not result:
-        return "No active bookings found."
-    
-    response_lines = ["Your Reservations:"]
-    for slot in result:
-        status = "Active" if slot.get("isActive", True) else "Cancelled"
-        response_lines.append(
-            f"- ID #{slot.get('id')} | {slot.get('bookingDate')} at {slot.get('bookingTime')} | Guests: {slot.get('noOfPeople')} | {status}"
-        )
-    return "\n".join(response_lines)
+def Retrieve_User_Bookings(name: Optional[str] = None, contact: Optional[str] = None):
+    """Retrieve all bookings for a user using name or contact."""
+    return get_user_slot(name=name, contact=contact)
 
 @tool(args_schema=CancelInput)
-def Cancel_Reservation(slot_id: int):
+def Cancel_Reservation(slot_id: int) -> str:
     """Cancels a slot by ID."""
     return cancel_slot(slot_id)
     

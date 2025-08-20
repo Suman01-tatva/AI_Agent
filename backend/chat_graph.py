@@ -50,8 +50,7 @@ prompt = ChatPromptTemplate.from_messages([
 # --- Agent node ---
 def call_agent(state: AgentState) -> AgentState:
     messages = state["messages"]
-    agent_scratchpad = [msg for msg in state["messages"] if isinstance(msg, ToolMessage)]
-    formatted = prompt.format_prompt(messages=messages, agent_scratchpad=agent_scratchpad).to_messages()
+    formatted = prompt.format_prompt(messages=messages, agent_scratchpad=[]).to_messages()
     response = llm.invoke(formatted)
     tool_calls = getattr(response, "tool_calls", [])
     messages = state["messages"] + [AIMessage(content=getattr(response, "content", str(response)), tool_calls=tool_calls)]
