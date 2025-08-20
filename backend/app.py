@@ -194,7 +194,7 @@ def compress_image(file, target_quality=85, max_size=(1024, 1024)):
 @app.route("/image-chat", methods=["POST"])
 def image_chat():
     if "image" not in request.files:
-        return jsonify({"error": "❗ No image file provided"}), 400
+        return jsonify({"error": "No image file provided"}), 400
 
     image_file = request.files["image"]
     filename = secure_filename(image_file.filename)
@@ -251,8 +251,9 @@ def chat():
     final_input = (
         f"{user_input}\n\n"
         f"(Note: Always respond in **{user_lang}** only. Never switch languages.)\n\n"
-        "(Note: Wrap responses in HTML tags (<div>, <p>, <li>, etc.) but do not include <html> or triple backticks (```).)"
-        f"Context (if any):\n{knowledge_context}"
+        "(Note: Wrap responses in HTML tags (<div>, <p>, <li>, etc.). "
+        "Never include <html>, <body>, Markdown, or any code fencing (```html, ```markdown, ```)) in your responses."
+        f"\n\nContext (if any):\n{knowledge_context}"
     )
 
     messages = [HumanMessage(content=final_input)]
