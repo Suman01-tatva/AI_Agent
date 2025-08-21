@@ -156,13 +156,14 @@ const Chatbot = () => {
     formData.append("language", language); // send selected language for STT
 
     try {
-      const sttRes = await fetch("http://localhost:5000/stt", {
+      const sttRes = await fetch("http://localhost:5000/whisper-stt", {
         method: "POST",
         body: formData,
       });
       const sttData = await sttRes.json();
 
       if (sttData.transcript) {
+        console.log("STT Result:", sttData.transcript);
         sendMessage(sttData.transcript, true);
       } else {
         console.error("STT error:", sttData.error || "No transcript");
@@ -278,6 +279,9 @@ const Chatbot = () => {
                     className="text-gray-800"
                   >
                     English
+                  </option>
+                  <option value="ja" className="text-gray-800">
+                    日本語 (Japanese)
                   </option>
                   <option value="hi" className="text-gray-800">
                     हिंदी

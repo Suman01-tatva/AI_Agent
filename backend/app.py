@@ -1,4 +1,6 @@
 from flask import Flask, request, jsonify
+from faster_whisper import WhisperModel
+import tempfile
 from flask_cors import CORS
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage
@@ -21,6 +23,8 @@ os.environ["LANGCHAIN_TRACING_V2"] = "false"
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "secret-key")
 CORS(app, supports_credentials=True)
+
+whisperModel = WhisperModel("large-v3-turbo", compute_type="int8")
 
 # Build LangGraph once at startup
 from knowledge_base import retriever_tool
@@ -221,6 +225,31 @@ def tts():
     except Exception as e:
         logging.error("TTS error:", exc_info=e)
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/whisper-stt", methods=["POST"])
+def whisperstt():
+    if "audio" not in request.files:
+        return jsonify({"error": "No audio file"}), 400
+
+    audio_file = request.files["audio"]
+
+    # Save temp file
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+        audio_file.save(tmp.name)
+        temp_path = tmp.name
+
+    try:
+        # Transcribe
+        user_lang = request.form.get("language") or None
+        segments, info = whisperModel.transcribe(temp_path,language = user_lang, task="transcribe", beam_size=8, best_of=5, condition_on_previous_text=True, temperature=[0.0, 0.2, 0.4])
+        text = " ".join([s.text.strip() for s in segments])
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        os.remove(temp_path)
+
+    return jsonify({"transcript": text})
 
 if __name__ == "__main__":
     app.run(debug=True)
