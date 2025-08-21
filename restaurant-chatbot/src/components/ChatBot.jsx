@@ -162,12 +162,20 @@ const Chatbot = () => {
     // Cancel ongoing speech
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-
+    const voices = window.speechSynthesis.getVoices();
+    let voice = null;
     // Set language based on user selection
     if (language === "hi") {
       utterance.lang = "hi-IN";
     } else if (language === "gu") {
-      utterance.lang = "gu-IN";
+      voice = voices.find((v) => v.lang.startsWith("gu"));
+      // If Gujarati voice not found → fallback to Hindi
+      if (!voice) {
+        voice = voices.find((v) => v.lang.startsWith("hi")) || voices[0];
+        utterance.lang = "hi-IN";
+      } else {
+        utterance.lang = "gu-IN";
+      }
     } else {
       utterance.lang = "en-US";
     }
@@ -258,38 +266,38 @@ const Chatbot = () => {
                       {parse(part.text)}
                     </div>
                   ))}
-                       {m.role === "model" && (
-                  <div className="flex gap-2 mt-2">
-                    <button
-                      onClick={() =>
-                        speak(stripHTML(m.parts.map((p) => p.text).join(" ")))
-                      }
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-100 text-orange-600 hover:bg-orange-200 transition"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
+                  {m.role === "model" && (
+                    <div className="flex gap-2 mt-2">
+                      <button
+                        onClick={() =>
+                          speak(stripHTML(m.parts.map((p) => p.text).join(" ")))
+                        }
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-100 text-orange-600 hover:bg-orange-200 transition"
                       >
-                        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
-                        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
-                      </svg>
-                    </button>
+                        <svg
+                          className="w-4 h-4"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                          <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                        </svg>
+                      </button>
 
-                    <button
-                      onClick={stopSpeaking}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
+                      <button
+                        onClick={stopSpeaking}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition"
                       >
-                        <rect x="6" y="6" width="12" height="12" rx="2" />
-                      </svg>
-                    </button>
-                  </div>
-                )}
+                        <svg
+                          className="w-4 h-4"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <rect x="6" y="6" width="12" height="12" rx="2" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
