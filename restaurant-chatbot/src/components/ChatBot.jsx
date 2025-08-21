@@ -28,7 +28,13 @@ const Chatbot = () => {
     return storedId;
   });
 
-  // 📤 Send text message
+  const stripHTML = (html) => {
+    const temp = document.createElement("div");
+    temp.innerHTML = html;
+    return temp.textContent || temp.innerText || "";
+  };
+
+  // Send text message
   const sendMessage = useCallback(
     async (customInput) => {
       const messageToSend = customInput || input;
@@ -50,12 +56,14 @@ const Chatbot = () => {
         });
 
         const data = await response.json();
-        const botReply = data.response || `❌ ${data.error}`;
+        const botReply = data.response || `${data.error}`;
 
         setMessages((prev) => [
           ...prev,
           { role: "model", parts: [{ text: botReply }] },
         ]);
+
+        speak(stripHTML(botReply));
       } catch (err) {
         setMessages((prev) => [
           ...prev,
@@ -66,7 +74,7 @@ const Chatbot = () => {
     [input, language, userId]
   );
 
-  // 📷 Send selected image
+  // Send selected image
   const sendImage = async () => {
     if (!selectedImage) return;
 
@@ -76,7 +84,7 @@ const Chatbot = () => {
       ...prev,
       {
         role: "user",
-        parts: [{ text: input || "📷 Sent an image" }],
+        parts: [{ text: input || "Sent an image" }],
         image: previewUrl,
       },
     ]);
@@ -94,16 +102,19 @@ const Chatbot = () => {
         body: formData,
       });
       const data = await res.json();
-      const botReply = data.response || `❌ ${data.error}`;
+      const botReply = data.response || `${data.error}`;
 
       setMessages((prev) => [
         ...prev,
         { role: "model", parts: [{ text: botReply }] },
       ]);
+
+      // Speak the reply
+      speak(stripHTML(botReply));
     } catch (err) {
       setMessages((prev) => [
         ...prev,
-        { role: "model", parts: [{ text: `⚠️ Error: ${err.message}` }] },
+        { role: "model", parts: [{ text: `Error: ${err.message}` }] },
       ]);
     } finally {
       setSelectedImage(null);
@@ -142,6 +153,38 @@ const Chatbot = () => {
     recognition.start();
   };
 
+  // Text-to-Speech (TTS)
+  const speak = (text) => {
+    if (!window.speechSynthesis) {
+      console.warn("TTS not supported in this browser.");
+      return;
+    }
+
+    // Cancel ongoing speech
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+
+    // Set language based on user selection
+    if (language === "hi") {
+      utterance.lang = "hi-IN";
+    } else if (language === "gu") {
+      utterance.lang = "gu-IN";
+    } else {
+      utterance.lang = "en-US";
+    }
+
+    utterance.rate = 1;
+    utterance.pitch = 1;
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const stopSpeaking = () => {
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+    }
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br p-4">
       <div className="max-w-2xl mx-auto">
@@ -157,15 +200,19 @@ const Chatbot = () => {
           {/* Language Selector */}
           <div className="bg-gradient-to-r from-orange-500 to-red-500 p-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-white font-semibold text-lg">Chat Assistant</h2>
+              <h2 className="text-white font-semibold text-lg">
+                Chat Assistant
+              </h2>
               <div className="flex items-center gap-3">
-                <label className="text-white/90 font-medium text-sm">Language:</label>
+                <label className="text-white/90 font-medium text-sm">
+                  Language:
+                </label>
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
                   className="bg-white/20 backdrop-blur-sm text-white border border-white/30 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-white/50 transition-all appearance-none cursor-pointer"
                 >
-                 <option
+                  <option
                     value="en"
                     className="text-gray-800 flex items-center"
                   >
@@ -213,6 +260,38 @@ const Chatbot = () => {
                       {parse(part.text)}
                     </div>
                   ))}
+                       {m.role === "model" && (
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={() =>
+                        speak(stripHTML(m.parts.map((p) => p.text).join(" ")))
+                      }
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-100 text-orange-600 hover:bg-orange-200 transition"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                      </svg>
+                    </button>
+
+                    <button
+                      onClick={stopSpeaking}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <rect x="6" y="6" width="12" height="12" rx="2" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
                 </div>
               </div>
             ))}
@@ -277,7 +356,14 @@ const Chatbot = () => {
                   onClick={startRecording}
                   title="Voice Input"
                 >
-                  🎤
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                  </svg>
                 </button>
 
                 {/* Image button */}
@@ -286,7 +372,7 @@ const Chatbot = () => {
                   onClick={() => fileInputRef.current.click()}
                   title="Upload Image"
                 >
-                   <svg
+                  <svg
                     className="w-5 h-5"
                     fill="none"
                     stroke="currentColor"
