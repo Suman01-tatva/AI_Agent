@@ -1,20 +1,32 @@
-from datetime import datetime, timedelta
 import requests
 from dotenv import load_dotenv
 import os
-from typing import Optional
 
 # Load environment variables
 load_dotenv()
-_raw = os.getenv("SLOT_API_URL")
-if not _raw:
+SLOT_API_URL = os.getenv("SLOT_API_URL")
+if not SLOT_API_URL:
     raise ValueError("SLOT_API_URL is not set in environment variables.")
-SLOT_API_URL = _raw.rstrip("/")
 
-
-# --- Insert new booking ---
-def insert_booking(name: str, contact: str, time: str, guests: int, date: str):
+# --- Check slot and save slot ---
+def check_and_save_slot(name: str, contact: str, time: str, guests: int, date: str) -> str:
     try:
+        # Step 1: Check availability
+        availability_url = f"{SLOT_API_URL}/Availability"
+        params = {"date": date, "time": time, "partySize": guests}
+        response = requests.get(availability_url, params=params)
+
+        if response.status_code != 200:
+            return f"Error checking availability: {response.status_code} - {response.text}"
+
+        availability = response.json()
+        if not availability["available"]:
+            return (
+                f"❌ Sorry, we cannot accommodate {guests} people at {time} on {date}. "
+                f"Remaining capacity: {availability['remainingCapacity']} out of {availability['capacity']}."
+            )
+
+        # Step 2: Book the slot
         payload = {
             "bookingName": name,
             "bookingDate": date,
@@ -23,31 +35,14 @@ def insert_booking(name: str, contact: str, time: str, guests: int, date: str):
             "contactNumber": contact,
         }
         response = requests.post(SLOT_API_URL, json=payload)
-        if response.status_code in (200, 201):
+        if response.status_code == 200:
             result = response.json()
-            booking_id = result.get("id")
-            return f"✅ Reservation confirmed! Booking ID: #{booking_id}." if booking_id else "✅ Reservation confirmed!"
+            return f"✅ Your reservation is confirmed! Booking ID: #{result['id']}."
         else:
-            return f"Error from API: {response.status_code} - {response.text}"
-    except Exception as e:
-        return f"Error: {str(e)}"
+            return f"Error saving booking: {response.status_code} - {response.text}"
 
-def is_slot_available(date: str, time: Optional[str], guests: int, exclude_id: Optional[int] = None) -> Optional[bool]:
-    try:
-        if not time:
-            return None  # cannot decide without time for capacity model
-        params = {"date": date, "time": time, "partySize": guests}
-        if exclude_id:
-            params["excludeSlotId"] = exclude_id
-        resp = requests.get(f"{SLOT_API_URL}/Availability", params=params)
-        if resp.status_code == 200:
-            data = resp.json()
-            return bool(data.get("available", False))
-        return None
     except Exception as e:
-        print(f"Error checking availability: {e}")
-        return None
-
+        return f"🔥 Exception while booking: {str(e)}"
 
 # --- Fetch user slot(s) by name/contact ---
 def get_user_slot(name: str, contact: str):
@@ -59,12 +54,12 @@ def get_user_slot(name: str, contact: str):
         if response.status_code == 200:
             return response.json()
         else:
-            return {f"Error from Slot API: {response.status_code} - {response.text}"}
+            return f"🔥 Error from Slot API: {response.status_code} - {response.text}"
     except Exception as e:
-        return {f"🔥 Exception while fetching booking: {str(e)}"}
+        return f"🔥 Exception while fetching booking: {str(e)}"
 
 # --- Cancel a slot by ID ---
-def cancel_slot(slot_id: int):
+def cancel_slot(slot_id: int) -> str:
     try:
         response = requests.patch(
             f"{SLOT_API_URL}/CancelSlot", params={"slotId": slot_id}
@@ -77,7 +72,7 @@ def cancel_slot(slot_id: int):
         return f"🔥 Error during cancellation: {str(e)}"
 
 # ---  Update a slot using full slot data ---
-def update_slot(slot_data: dict):
+def update_slot(slot_data: dict) -> str:
     try:
         response = requests.put(f"{SLOT_API_URL}/UpdateSlot", json=slot_data)
         if response.status_code in (200, 204):
