@@ -78,13 +78,12 @@ const Chatbot = () => {
   const sendImage = async () => {
     if (!selectedImage) return;
 
-    // preview in chat
     const previewUrl = URL.createObjectURL(selectedImage);
     setMessages((prev) => [
       ...prev,
       {
         role: "user",
-        parts: [{ text: input || "Sent an image" }],
+        parts: [{ text: input || "" }],
         image: previewUrl,
       },
     ]);
@@ -95,7 +94,7 @@ const Chatbot = () => {
     formData.append("prompt", input || "Describe this image");
     formData.append("language", language);
     formData.append("user_id", userId);
-
+    setSelectedImage(null);
     try {
       const res = await fetch("http://localhost:5000/image-chat", {
         method: "POST",
@@ -121,7 +120,7 @@ const Chatbot = () => {
     }
   };
 
-  // 🎤 Voice input
+  // Voice input
   const startRecording = () => {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -162,7 +161,6 @@ const Chatbot = () => {
 
     // Cancel ongoing speech
     window.speechSynthesis.cancel();
-
     const utterance = new SpeechSynthesisUtterance(text);
 
     // Set language based on user selection
@@ -299,7 +297,6 @@ const Chatbot = () => {
 
           {/* Input */}
           <div className="p-6 pt-2 bg-white border-t border-gray-100 relative">
-            {/* Image preview before send */}
             {selectedImage && (
               <div className="absolute bottom-full left-6 right-6 mb-2 bg-orange-50 rounded-xl shadow-lg p-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -368,7 +365,7 @@ const Chatbot = () => {
 
                 {/* Image button */}
                 <button
-                  className="absolute right-0 top-1/2 -translate-y-1/2 p-2 rounded-full text-gray-400 hover:text-orange-500"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 p-2 me-2 rounded-full text-gray-400 hover:text-orange-500"
                   onClick={() => fileInputRef.current.click()}
                   title="Upload Image"
                 >
@@ -405,8 +402,6 @@ const Chatbot = () => {
             </div>
           </div>
         </div>
-
-        {/* Footer */}
         <div className="text-center mt-4 text-gray-300 text-sm">
           Powered by ITC Restaurant AI
         </div>
