@@ -187,12 +187,12 @@ def retrieve_knowledge(query: str) -> str:
     except Exception as e:
         logging.error("FAISS retrieval error", exc_info=e)
 
-    try:
-        tavily_result = tavily_search(query)
-    except Exception as e:
-        logging.error("Tavily search failed", exc_info=e)
+    # try:
+    #     tavily_result = tavily_search(query)
+    # except Exception as e:
+    #     logging.error("Tavily search failed", exc_info=e)
 
-    return (faiss_result + "\n\n" + tavily_result).strip()
+    return (faiss_result).strip()
 
 # Build LangGraph once at startup
 graph = build_chat_graph()
