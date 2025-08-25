@@ -164,6 +164,7 @@ const Chatbot = () => {
 
       if (sttData.transcript) {
         console.log("STT Result:", sttData.transcript);
+        console.log("STT Result:", sttData.language);
         sendMessage(sttData.transcript, true);
       } else {
         console.error("STT error:", sttData.error || "No transcript");

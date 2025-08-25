@@ -11,7 +11,7 @@ from typing import TypedDict, Annotated, Sequence
 from langgraph.graph.message import add_messages
 from langgraph.checkpoint.memory import MemorySaver
 from tools import all_tools
-from knowledge_base import retriever_tool
+from knowledge_base import knowledge_retriever_tool,web_search_tool
 
 load_dotenv()
 api_key = os.getenv("GOOGLE_API_KEY")
@@ -23,7 +23,7 @@ llm = ChatGoogleGenerativeAI(
     temperature=0.5,
 )
 
-tools = all_tools + [retriever_tool]
+tools = all_tools + [knowledge_retriever_tool] + [web_search_tool]
 llm = llm.bind_tools(tools)
 
 # --- Agent State ---

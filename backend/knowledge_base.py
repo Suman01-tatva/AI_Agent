@@ -11,6 +11,8 @@ from langchain_community.document_loaders import RecursiveUrlLoader, Unstructure
 import re
 import os
 import logging
+import asyncio
+from websearch import custom_web_search
 
 JSON_PATH = os.path.join(os.path.dirname(__file__), "restaurant-data.json")
 PDF_PATH = os.path.join(os.path.dirname(__file__), "restaurant_menu.pdf")
@@ -114,7 +116,7 @@ try:
         logging.info("🔄 Rebuilding FAISS vector store...")
         documents = []
         documents.extend(json_to_documents(knowledge))
-        documents.extend(scrape_website(os.getenv("SITE_URL")))
+        # documents.extend(scrape_website(os.getenv("SITE_URL")))
         documents.extend(pdf_to_document(PDF_PATH))
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
         chunks = text_splitter.split_documents(documents)
@@ -140,9 +142,26 @@ except Exception as e:
 # --- Knowledge Retrieval ---
 
 @tool
-def retriever_tool(query: str) -> str:
+def knowledge_retriever_tool(query: str) -> str:
     """Search the restaurant knowledge base and return information."""
     if retriever is None:
         return "Service unavailable."
     docs = retriever.invoke(query)
     return "\n".join([doc.page_content for doc in docs]) if docs else "No relevant information found."
+
+import time
+
+@tool
+def web_search_tool(query: str) -> str:
+    """
+    Perform a web search for the given query.
+    """
+    try:
+        start_time = time.time()
+        web_results = asyncio.run(custom_web_search(query))
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        print(f"Time taken: {elapsed_time:.2f} seconds")
+        return "\n".join(doc.page_content for doc in web_results) if web_results else "No relevant information found."
+    except Exception as e:
+        return f"Error performing web search: {str(e)}"
