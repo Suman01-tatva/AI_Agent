@@ -68,7 +68,7 @@ const Chatbot = () => {
 
       window.speechSynthesis.speak(utterance);
     },
-    [language] // ✅ re-create only if language changes
+    [language]
   );
 
   // Send text message
@@ -87,7 +87,7 @@ const Chatbot = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             message: messageToSend,
-            language,
+            language: language,
             user_id: userId,
           }),
         });

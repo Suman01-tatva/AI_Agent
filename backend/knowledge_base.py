@@ -11,6 +11,8 @@ from langchain_community.document_loaders import RecursiveUrlLoader, Unstructure
 import re
 import os
 import logging
+from dotenv import load_dotenv
+load_dotenv()
 
 JSON_PATH = os.path.join(os.path.dirname(__file__), "restaurant-data.json")
 PDF_PATH = os.path.join(os.path.dirname(__file__), "restaurant_menu.pdf")

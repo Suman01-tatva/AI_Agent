@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 from chat_graph import build_chat_graph
-from langchain_core.messages import HumanMessage , AIMessage
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 import os
 import json
 import logging
@@ -49,19 +49,23 @@ def chat():
 
     data = request.get_json()
     user_input = data.get("message", "").strip()
+    user_language = data.get("language", "en")
     user_id = data.get("user_id", "default")
 
     if not user_input:
         return jsonify({"error": "No message provided"}), 400
 
-    # Load persistent history from JSON
+    # --- Otherwise run LangGraph ---
     past_messages = [
         HumanMessage(content=msg["content"]) if msg["role"] == "user" else AIMessage(content=msg["content"])
         for msg in get_user_history(user_id)
     ]
 
-    # Add the new user input to the conversation
-    state = {"messages": past_messages + [HumanMessage(content=user_input)]}
+    system_instruction = SystemMessage(
+        content=f"Always respond in {'Hindi' if user_language == 'hi' else 'Gujarati' if user_language == 'gu' else 'English'}."
+    )
+
+    state = {"messages": [system_instruction] + past_messages + [HumanMessage(content=user_input)]}
     config = {"configurable": {"thread_id": user_id}}
 
     try:
@@ -70,14 +74,36 @@ def chat():
         logging.error("LangGraph invocation failed:", exc_info=e)
         return jsonify({"response": "Something went wrong with the chatbot."}), 500
 
-    final_response = result["messages"][-1].content
+    final_response = result["messages"][-1].content.strip()
 
-    # Save conversation to JSON for persistence
+    # --- Normal case ---
     add_message(user_id, "user", user_input)
     add_message(user_id, "assistant", final_response)
 
-    return jsonify({"response": final_response})
+    return jsonify({
+        "response": final_response,
+        "language": user_language
+    })
 
+
+# --- Translation Helper ---
+def translate_to_language(html_text: str, lang: str) -> str:
+    """Translate DuckDuckGo results into Hindi/Gujarati/English while preserving HTML tags."""
+    if lang == "en":  # no translation needed
+        return html_text
+
+    try:
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        prompt = (
+            f"Translate the following text into "
+            f"{'Hindi' if lang == 'hi' else 'Gujarati'} "
+            f"but KEEP all HTML tags exactly as they are:\n\n{html_text}"
+        )
+        response = model.generate_content(prompt)
+        return response.text.strip() if response and response.text else html_text
+    except Exception as e:
+        logging.error(f"Translation failed: {e}")
+        return html_text
 
 
 @app.route("/image-chat", methods=["POST"])
@@ -88,6 +114,7 @@ def image_chat():
     image_file = request.files["image"]
     filename = secure_filename(image_file.filename)
     user_id = request.form.get("user_id", "default")
+    user_language = request.form.get("language", "en")  # ✅ allow passing language here
 
     try:
         compressed_bytes, mime_type = compress_image(image_file)
@@ -110,18 +137,26 @@ def image_chat():
             "give a short, accurate answer ONLY about this hotel. "
             "If unrelated, say: 'The image does not seem related to ITC Narmada Hotel.' "
             "Max 30 words, match user language.\n\n"
-            f"(Note: Always respond in user's input language.)\n\n"
+            f"(Note: Always respond in {'Hindi' if user_language == 'hi' else 'Gujarati' if user_language == 'gu' else 'English'}.)\n\n"
             f"Image details: {image_desc}\n"
             f"Hotel knowledge: {knowledge_context}"
         )
 
         config = {"configurable": {"thread_id": user_id}}
-        result = app.invoke({"messages": [HumanMessage(content=prompt_text)]}, config)
+        result = graph.invoke({"messages": [HumanMessage(content=prompt_text)]}, config)
 
-        return jsonify({"response": result["messages"][-1].content})
+        assistant_reply = result["messages"][-1].content
+
+        # ✅ Persist history
+        add_message(user_id, "user", f"[Image Uploaded: {filename}] {image_desc}")
+        add_message(user_id, "assistant", assistant_reply)
+
+        return jsonify({"response": assistant_reply})
 
     except Exception as e:
+        logging.error("Image-chat failed:", exc_info=e)
         return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True)
