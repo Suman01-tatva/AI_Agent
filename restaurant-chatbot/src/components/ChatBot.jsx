@@ -121,7 +121,7 @@ const Chatbot = () => {
       ...prev,
       {
         role: "user",
-        parts: [{ text: input || "Sent an image" }],
+        parts: [{ text: input }],
         image: previewUrl,
       },
     ]);
@@ -377,7 +377,7 @@ const Chatbot = () => {
 
                 {/* Image button */}
                 <button
-                  className="absolute right-0 top-1/2 -translate-y-1/2 p-2 rounded-full text-gray-400 hover:text-orange-500"
+                  className="absolute right-0 me-2 top-1/2 -translate-y-1/2 p-2 rounded-full text-gray-400 hover:text-orange-500"
                   onClick={() => fileInputRef.current.click()}
                   title="Upload Image"
                 >

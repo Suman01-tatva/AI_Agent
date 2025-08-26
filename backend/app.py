@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 from chat_graph import build_chat_graph
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+from langchain_core.messages import HumanMessage , AIMessage , SystemMessage
 import os
 import json
 import logging
@@ -14,6 +14,10 @@ import google.generativeai as genai
 from langgraph.checkpoint.memory import MemorySaver
 from knowledge_base import retriever_tool
 from history_manager import add_message, get_user_history
+import easyocr
+reader = easyocr.Reader(['en'])
+import numpy as np
+import cv2
 
 load_dotenv()
 os.environ["LANGCHAIN_TRACING_V2"] = "false"
@@ -49,7 +53,7 @@ def chat():
 
     data = request.get_json()
     user_input = data.get("message", "").strip()
-    user_language = data.get("language", "en")
+    user_lang = data.get("language", "en")
     user_id = data.get("user_id", "default")
 
     if not user_input:
@@ -60,9 +64,9 @@ def chat():
         HumanMessage(content=msg["content"]) if msg["role"] == "user" else AIMessage(content=msg["content"])
         for msg in get_user_history(user_id)
     ]
-
+    
     system_instruction = SystemMessage(
-        content=f"Always respond in {'Hindi' if user_language == 'hi' else 'Gujarati' if user_language == 'gu' else 'English'}."
+        content=f"Always respond in {'Hindi' if user_lang == 'hi' else 'Gujarati' if user_lang == 'gu' else 'English'}."
     )
 
     state = {"messages": [system_instruction] + past_messages + [HumanMessage(content=user_input)]}
@@ -78,12 +82,35 @@ def chat():
 
     # --- Normal case ---
     add_message(user_id, "user", user_input)
-    add_message(user_id, "assistant", final_response)
 
-    return jsonify({
-        "response": final_response,
-        "language": user_language
-    })
+    return jsonify({"response": final_response, "language": user_lang})
+
+def analyze_image_custom(image_bytes: bytes) -> str:
+    np_img = np.frombuffer(image_bytes, np.uint8)
+    img = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
+
+    results = reader.readtext(img)
+    text = " ".join([res[1] for res in results])
+    return text if text else "No text found"
+
+from transformers import BlipProcessor, BlipForConditionalGeneration
+from PIL import Image
+
+processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
+model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
+
+def generate_caption(image_bytes: bytes) -> str:
+    img = Image.open(BytesIO(image_bytes))
+    inputs = processor(img, return_tensors="pt")
+    out = model.generate(**inputs, max_length=30)
+    return processor.decode(out[0], skip_special_tokens=True)
+
+def process_image_for_llm(image_bytes: bytes) -> str:
+    ocr_text = analyze_image_custom(image_bytes)
+    caption = generate_caption(image_bytes)
+
+    combined = f"OCR text: {ocr_text}\nImage caption: {caption}"
+    return combined
 
 
 # --- Translation Helper ---
@@ -119,18 +146,10 @@ def image_chat():
     try:
         compressed_bytes, mime_type = compress_image(image_file)
 
-        model = genai.GenerativeModel("gemini-1.5-flash")
-
-        # Step 1: Get image description
-        image_desc = model.generate_content([
-            "Briefly describe the key elements of this image (50 words).",
-            {"mime_type": mime_type, "data": compressed_bytes}
-        ]).text.strip()
-
-        # Step 2: Retrieve hotel knowledge
+        image_desc = process_image_for_llm(compressed_bytes)
         knowledge_context = retriever_tool.invoke(image_desc)
 
-        # Step 3: Run through LangGraph (so memory works)
+        # Step 3: Run through LangGraph
         prompt_text = (
             "You are an assistant for ITC Narmada Hotel, Ahmedabad. "
             "Using the image details and hotel knowledge provided, "
@@ -145,13 +164,7 @@ def image_chat():
         config = {"configurable": {"thread_id": user_id}}
         result = graph.invoke({"messages": [HumanMessage(content=prompt_text)]}, config)
 
-        assistant_reply = result["messages"][-1].content
-
-        # ✅ Persist history
-        add_message(user_id, "user", f"[Image Uploaded: {filename}] {image_desc}")
-        add_message(user_id, "assistant", assistant_reply)
-
-        return jsonify({"response": assistant_reply})
+        return jsonify({"response": result["messages"][-1].content})
 
     except Exception as e:
         logging.error("Image-chat failed:", exc_info=e)
