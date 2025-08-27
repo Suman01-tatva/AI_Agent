@@ -1,38 +1,59 @@
 from flask import Flask, request, jsonify
-# from faster_whisper import WhisperModel
-import tempfile
 from flask_cors import CORS
 from dotenv import load_dotenv
-from langchain_core.messages import HumanMessage
 import os
-import logging
 import requests
-from werkzeug.utils import secure_filename
+import re
+import logging
+import asyncio
+from faster_whisper import WhisperModel
+import google.generativeai as google_genai
+from langchain_core.messages import HumanMessage
 from io import BytesIO
 from PIL import Image
-import google.generativeai as genai
-import os
 import base64
-import re
 
+from google import genai
+from google.genai import types
+import wave
+import io
+import tempfile
+
+# ---------- Load env ----------
 load_dotenv()
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+if not GOOGLE_API_KEY:
+    raise RuntimeError("Set GOOGLE_API_KEY in .env or environment variables.")
 
+# ---------- Config ----------
 os.environ["LANGCHAIN_TRACING_V2"] = "false"
+
+WHISPER_MODEL = "large-v3-turbo"
+WHISPER_COMPUTE_TYPE = "int8"  # float32, float16, int8_float16, int8
+TTS_MODEL_NAME = "models/gemini-2.5-flash-preview-tts"
+LLM_MODEL = "models/gemini-2.5-flash"
+
+ELEVEN_API_KEY = os.getenv("ELEVEN_API_KEY")
+VOICE_ID = os.getenv("ELEVEN_VOICE_ID")
+TTS_MODEL_ID = "eleven_multilingual_v2" 
+STT_MODEL_ID = "scribe_v1"
 
 # Flask app setup
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "secret-key")
-CORS(app, supports_credentials=True)
+CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
 
-# whisperModel = WhisperModel("large-v3-turbo", compute_type="float32", num_workers=6)
+whisperModel = WhisperModel(WHISPER_MODEL, compute_type=WHISPER_COMPUTE_TYPE)
+client = genai.Client()
 
 # Build LangGraph once at startup
-from knowledge_base import knowledge_retriever_tool
+from knowledge_base import knowledge_retriever_tool,add_to_knowledge_base
 from chat_graph import build_chat_graph
 graph = build_chat_graph()
 
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+google_genai.configure(api_key=GOOGLE_API_KEY)
 
+# --- Image compression and chat ---
 def compress_image(file, target_quality=85, max_size=(1024, 1024)):
     try:
         img = Image.open(file)
@@ -55,17 +76,16 @@ def compress_image(file, target_quality=85, max_size=(1024, 1024)):
 
 @app.route("/image-chat", methods=["POST"])
 def image_chat():
-    if "image" not in request.files:
+    if "file" not in request.files:
         return jsonify({"error": "❗ No image file provided"}), 400
 
-    image_file = request.files["image"]
-    filename = secure_filename(image_file.filename)
+    image_file = request.files["file"]
 
     try:
         # Compress image
         compressed_bytes, mime_type = compress_image(image_file)
 
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = google_genai.GenerativeModel("gemini-1.5-flash")
         image_desc = model.generate_content([
             "Briefly describe the key elements of this image (50 words).",
             {
@@ -95,6 +115,7 @@ def image_chat():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# --- Text chat ---
 @app.route("/chat", methods=["POST"])
 def chat():
     if graph is None:
@@ -128,13 +149,7 @@ def chat():
 
     return jsonify({"response": final_response})
 
-
-ELEVEN_API_KEY = os.getenv("ELEVEN_API_KEY")
-VOICE_ID = os.getenv("ELEVEN_VOICE_ID")
-
-TTS_MODEL_ID = "eleven_multilingual_v2" 
-STT_MODEL_ID = "scribe_v1"
-
+# --- STT and TTS with Elevenlabs ---
 @app.route("/stt", methods=["POST"])
 def stt():
     if not ELEVEN_API_KEY:
@@ -226,30 +241,146 @@ def tts():
         logging.error("TTS error:", exc_info=e)
         return jsonify({"error": str(e)}), 500
 
+# --- STT with Whisper ---
+@app.route("/whisper-stt", methods=["POST"])
+def whisperstt():
+    if "audio" not in request.files:
+        return jsonify({"error": "No audio file"}), 400
 
-# @app.route("/whisper-stt", methods=["POST"])
-# def whisperstt():
-#     if "audio" not in request.files:
-#         return jsonify({"error": "No audio file"}), 400
+    audio_file = request.files["audio"]
 
-#     audio_file = request.files["audio"]
+    # Save temp file
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+        audio_file.save(tmp.name)
+        temp_path = tmp.name
 
-#     # Save temp file
-#     with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
-#         audio_file.save(tmp.name)
-#         temp_path = tmp.name
+    try:
+        # Transcribe
+        user_lang = request.form.get("language") or None
+        segments, info = whisperModel.transcribe(temp_path,language = user_lang, task="transcribe", beam_size=7, condition_on_previous_text=True,word_timestamps=False, temperature=[0.0, 0.2, 0.4])
+        text = " ".join([s.text.strip() for s in segments])
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        os.remove(temp_path)
 
-#     try:
-#         # Transcribe
-#         user_lang = request.form.get("language") or None
-#         segments, info = whisperModel.transcribe(temp_path,language = user_lang, task="transcribe", beam_size=7, condition_on_previous_text=True,word_timestamps=False, temperature=[0.0, 0.2, 0.4])
-#         text = " ".join([s.text.strip() for s in segments])
-#     except Exception as e:
-#         return jsonify({"error": str(e)}), 500
-#     finally:
-#         os.remove(temp_path)
+    return jsonify({"transcript": text,"language": info.language})
 
-#     return jsonify({"transcript": text,"language": info.language})
+# --- TTS with Gemini ---
+@app.route("/gemini-tts", methods=["POST"])
+def synthesize_tts():
+    """
+    Returns base64-encoded audio (string).
+    """
+    data = request.get_json()
+    text = data.get("text", "").strip()
+    user_lang = data.get("language")  # From frontend
+    if not text:
+        return jsonify({"error": "No text provided"}), 400
+    try:
+        response = client.models.generate_content(
+            model=TTS_MODEL_NAME,
+            contents=text,
+            config=types.GenerateContentConfig(
+                response_modalities=["AUDIO"],
+                speech_config=types.SpeechConfig(
+                    language_code=user_lang
+                )
+            )
+        )
+        data = response.candidates[0].content.parts[0].inline_data.data
+        voice = pcm_to_wav_base64(data)
+        return jsonify({"audio": voice, "language": user_lang}), 200
+    except Exception as e:
+        raise RuntimeError(f"TTS synthesis failed: {e}")
+
+def pcm_to_wav_base64(pcm_bytes: bytes, channels=1, rate=24000, sample_width=2) -> str:
+    """
+    Convert raw PCM16 bytes into WAV base64 string for frontend playback.
+    """
+    buffer = io.BytesIO()
+    with wave.open(buffer, "wb") as wf:
+        wf.setnchannels(channels)      # mono
+        wf.setsampwidth(sample_width)  # 16-bit
+        wf.setframerate(rate)          # 24 kHz
+        wf.writeframes(pcm_bytes)
+
+    wav_bytes = buffer.getvalue()
+    return base64.b64encode(wav_bytes).decode("utf-8")
+    
+@app.route("/add-docs", methods=["POST"])
+def add_docs():
+    texts = request.form.getlist("texts")
+    files = request.files.getlist("files")
+
+    if not texts and not files:
+        return jsonify({"detail": "Provide text or files (JSON, PDF, DOCX)."}), 400
+
+    return add_to_knowledge_base(texts, files)
+
+@app.route("/gemini-image-chat", methods=["POST"])
+def vision_chat():
+    try:
+        question = request.form.get("question")
+        file = request.files.get("file")
+
+        if not question or not file:
+            return jsonify({"detail": "Missing question or file"}), 400
+
+        # Read uploaded file bytes
+        content = file.read()
+
+        # Run multimodal agent
+        reply = run_agent_multimodal(question, content)
+
+    except Exception as e:
+        return jsonify({"detail": f"Multimodal error: {e}"}), 500
+
+    return jsonify({"response": reply})
+
+def run_agent_multimodal(user_text: str, image_bytes: bytes) -> str:
+    """Send text + image (as bytes) to Google GenAI multimodal model."""
+
+    # Default MIME type
+    mime_type = "image/png"
+
+    # Try to detect real format via Pillow
+    try:
+        img = Image.open(BytesIO(image_bytes))
+        fmt = img.format.lower()
+        if fmt in ["jpeg", "jpg"]:
+            mime_type = "image/jpeg"
+        elif fmt == "png":
+            mime_type = "image/png"
+        elif fmt == "webp":
+            mime_type = "image/webp"
+    except Exception:
+        pass  # fallback stays "image/png"
+
+    # Encode image as base64
+    b64_img = base64.b64encode(image_bytes).decode("utf-8")
+
+    # Send multimodal request to Gemini
+    response = client.models.generate_content(
+        model=LLM_MODEL,
+        contents=[
+            types.Content(
+                role="user",
+                parts=[
+                    types.Part(text=user_text),
+                    types.Part(
+                        inline_data=types.Blob(
+                            mime_type=mime_type,
+                            data=b64_img
+                        )
+                    ),
+                ],
+            )
+        ]
+    )
+
+    # Return model’s text reply
+    return response.candidates[0].content.parts[0].text
 
 if __name__ == "__main__":
     app.run(debug=True)

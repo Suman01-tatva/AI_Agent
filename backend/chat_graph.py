@@ -1,9 +1,8 @@
 import os
 from typing import TypedDict
-from dotenv import load_dotenv
 
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.messages import HumanMessage, AIMessage, BaseMessage, ToolMessage
+from langchain_core.messages import AIMessage, BaseMessage, ToolMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.graph import StateGraph, END, START
 from datetime import date
@@ -11,19 +10,18 @@ from typing import TypedDict, Annotated, Sequence
 from langgraph.graph.message import add_messages
 from langgraph.checkpoint.memory import MemorySaver
 from tools import all_tools
-from knowledge_base import knowledge_retriever_tool,web_search_tool
+from knowledge_base import knowledge_tools
+from gemini_tool import gemini_tool
 
-load_dotenv()
-api_key = os.getenv("GOOGLE_API_KEY")
-if not api_key:
-    raise ValueError("GOOGLE_API_KEY missing in .env")
+# ---------- Config ----------
+LLM_MODEL = "models/gemini-2.5-flash"
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-2.0-flash",
+    model=LLM_MODEL,
     temperature=0.5,
 )
 
-tools = all_tools + [knowledge_retriever_tool] + [web_search_tool]
+tools = all_tools + knowledge_tools
 llm = llm.bind_tools(tools)
 
 # --- Agent State ---

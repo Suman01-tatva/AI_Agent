@@ -3,7 +3,7 @@ from langchain_core.tools import tool
 from langchain_community.vectorstores import FAISS
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader
 from bs4 import BeautifulSoup
 import hashlib
 import json
@@ -13,7 +13,15 @@ import os
 import logging
 import asyncio
 from websearch import custom_web_search
+from werkzeug.datastructures import FileStorage
+from typing import List
+from flask import jsonify
 
+# ---------- Config ----------
+EMBED_MODEL = "models/text-embedding-004"
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
+
+# -- File Paths ---
 JSON_PATH = os.path.join(os.path.dirname(__file__), "restaurant-data.json")
 PDF_PATH = os.path.join(os.path.dirname(__file__), "restaurant_menu.pdf")
 
@@ -91,7 +99,6 @@ def pdf_to_document(pdf_path: str) -> list[Document]:
     pages = pdf_loader.load()
     return pages
 
-
 def get_file_hash(filepath):
     try:
         with open(filepath, "rb") as f:
@@ -100,10 +107,9 @@ def get_file_hash(filepath):
         logging.error("Error computing hash:", exc_info=e)
         return None
 
+global_vector_store = None
 try:
-    embeddings = GoogleGenerativeAIEmbeddings(
-        model="models/embedding-001", google_api_key=os.getenv("GOOGLE_API_KEY")
-    )
+    embeddings = GoogleGenerativeAIEmbeddings(model=EMBED_MODEL)
 
     current_hash = get_file_hash(JSON_PATH)
     stored_hash = None
@@ -117,12 +123,11 @@ try:
         documents = []
         documents.extend(json_to_documents(knowledge))
         # documents.extend(scrape_website(os.getenv("SITE_URL")))
-        documents.extend(pdf_to_document(PDF_PATH))
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
+        # documents.extend(pdf_to_document(PDF_PATH))
         chunks = text_splitter.split_documents(documents)
         vector_store = FAISS.from_documents(chunks, embeddings)
         vector_store.save_local(FAISS_STORE_DIR)
-
+        global_vector_store = vector_store
         os.makedirs(FAISS_STORE_DIR, exist_ok=True)
         with open(HASH_FILE_PATH, "w") as f:
             f.write(current_hash or "")
@@ -131,13 +136,85 @@ try:
         vector_store = FAISS.load_local(
             FAISS_STORE_DIR, embeddings, allow_dangerous_deserialization=True
         )
+        global_vector_store = vector_store
         logging.info("✅ Loaded FAISS vector store from disk.")
 
-    retriever = vector_store.as_retriever(search_kwargs={"k": 15})
+    retriever = global_vector_store.as_retriever(search_kwargs={"k": 15})
 
 except Exception as e:
     retriever = None
     logging.error("Vector store setup failed:", exc_info=e)
+
+# --- Knowledge Ingestion ---
+def parse_json_content(raw: str) -> str:
+    """Try parsing as JSON, otherwise return raw text."""
+    try:
+        data = json.loads(raw)
+        if isinstance(data, dict):
+            return json.dumps(data, ensure_ascii=False)
+        elif isinstance(data, list):
+            return " ".join(map(str, data))
+        return str(data)
+    except json.JSONDecodeError:
+        return raw
+
+def parse_file(file: FileStorage, index: int) -> List[Document]:
+    """Parse JSON, PDF, or DOCX files into Documents."""
+    filename = file.filename.lower()
+    content = file.read()
+    docs = []
+
+    if filename.endswith(".json"):
+        try:
+            text_content = parse_json_content(content.decode("utf-8"))
+            docs.append(Document(page_content=text_content, metadata={"source": f"json_file_{index}"}))
+        except json.JSONDecodeError:
+            return jsonify({"detail": f"Invalid JSON file: {file.filename}"}), 400
+
+    elif filename.endswith(".pdf"):
+        tmp = f"temp_{index}.pdf"
+        with open(tmp, "wb") as f:
+            f.write(content)
+        docs = [Document(page_content=d.page_content, metadata={"source": f"pdf_{index}_{j}"})
+                for j, d in enumerate(PyPDFLoader(tmp).load(), 1)]
+        os.remove(tmp)
+
+    elif filename.endswith(".docx"):
+        tmp = f"temp_{index}.docx"
+        with open(tmp, "wb") as f:
+            f.write(content)
+        docs = [Document(page_content=d.page_content, metadata={"source": f"docx_{index}_{j}"})
+                for j, d in enumerate(Docx2txtLoader(tmp).load(), 1)]
+        os.remove(tmp)
+
+    else:
+        return jsonify({"detail": f"Unsupported file type: {file.filename}"}), 400
+
+    return docs
+
+def add_to_knowledge_base(texts, files):
+    documents = []
+    # Handle text inputs (plain text or JSON strings)
+    if texts:
+        documents.extend(
+            Document(page_content=parse_json_content(t), metadata={"source": f"text_{i}"})
+            for i, t in enumerate(texts, 1)
+        )
+    # Handle file uploads (JSON, PDF, DOCX)
+    if files:
+        for i, file in enumerate(files, 1):
+            documents.extend(parse_file(file, i))
+    # Split and add to vector store
+    global global_vector_store, retriever
+    try:
+        chunks = text_splitter.split_documents(documents)
+        global_vector_store.add_documents(chunks)
+        global_vector_store.save_local(FAISS_STORE_DIR)
+        retriever = global_vector_store.as_retriever(search_kwargs={"k": 15})
+    except Exception as e:
+        return jsonify({"detail": str(e)}), 500
+
+    return jsonify({"added": len(chunks)}), 200
 
 # --- Knowledge Retrieval ---
 
@@ -165,3 +242,6 @@ def web_search_tool(query: str) -> str:
         return "\n".join(doc.page_content for doc in web_results) if web_results else "No relevant information found."
     except Exception as e:
         return f"Error performing web search: {str(e)}"
+    
+# --- Tool Registry ---
+knowledge_tools = [knowledge_retriever_tool, web_search_tool]

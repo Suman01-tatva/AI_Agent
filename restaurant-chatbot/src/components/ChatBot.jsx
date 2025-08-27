@@ -61,8 +61,8 @@ const Chatbot = () => {
     setInput("");
 
     const formData = new FormData();
-    formData.append("image", selectedImage);
-    formData.append("prompt", input || "Describe this image");
+    formData.append("file", selectedImage);
+    formData.append("question", input || "Describe this image");
 
     try {
       const res = await fetch("http://localhost:5000/image-chat", {

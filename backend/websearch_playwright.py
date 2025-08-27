@@ -5,8 +5,6 @@ from typing import List
 from langchain_core.documents import Document
 from ddgs import DDGS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-# from crawl4ai import AsyncWebCrawler
-# import trafilatura
 from tenacity import retry, stop_after_attempt, wait_fixed
 from sentence_transformers import SentenceTransformer, util
 from playwright.async_api import async_playwright
