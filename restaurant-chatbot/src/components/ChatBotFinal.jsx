@@ -312,7 +312,7 @@ const ChatBotFinal = () => {
     formData.append("question", input || "Describe this image");
 
     try {
-      const res = await fetch("http://localhost:5000/gemini-image-chat", {
+      const res = await fetch("http://localhost:5000/image-chat", {
         method: "POST",
         body: formData,
       });
@@ -354,8 +354,7 @@ const ChatBotFinal = () => {
         },
       ]);
     } finally {
-      setSelectedImage(null);
-      setImagePreview(null);
+      removeImage();
       setLoading(false);
     }
   }, [selectedImage, imagePreview, input]);

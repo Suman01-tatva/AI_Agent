@@ -3,9 +3,12 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 import requests
+import numpy as np
 import re
 import logging
-import asyncio
+import cv2
+import easyocr
+reader = easyocr.Reader(['en'])
 from faster_whisper import WhisperModel
 import google.generativeai as google_genai
 from langchain_core.messages import HumanMessage
@@ -18,6 +21,7 @@ from google.genai import types
 import wave
 import io
 import tempfile
+from knowledge_base import knowledge_retriever_tool
 
 # ---------- Load env ----------
 load_dotenv()
@@ -74,46 +78,70 @@ def compress_image(file, target_quality=85, max_size=(1024, 1024)):
     except Exception as e:
         raise ValueError(f"Image compression failed: {str(e)}")
 
+def analyze_image_custom(image_bytes: bytes) -> str:
+    np_img = np.frombuffer(image_bytes, np.uint8)
+    img = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
+
+    results = reader.readtext(img)
+    text = " ".join([res[1] for res in results])
+    return text if text else "No text found"
+
+from transformers import BlipProcessor, BlipForConditionalGeneration
+from PIL import Image
+
+processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-large") # blip-image-captioning-base,blip-image-captioning-large,blip2-opt-2.7b
+model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-large")
+
+def generate_caption(image_bytes: bytes) -> str:
+    img = Image.open(BytesIO(image_bytes))
+    inputs = processor(img, return_tensors="pt")
+    out = model.generate(**inputs, max_new_tokens=50)
+    return processor.decode(out[0], skip_special_tokens=True)
+
+def process_image_for_llm(image_bytes: bytes) -> str:
+    ocr_text = analyze_image_custom(image_bytes)
+    caption = generate_caption(image_bytes)
+
+    combined = f"OCR text: {ocr_text}\nImage caption: {caption}"
+    return combined
+
 @app.route("/image-chat", methods=["POST"])
 def image_chat():
     if "file" not in request.files:
-        return jsonify({"error": "❗ No image file provided"}), 400
+        return jsonify({"error": "No image file provided"}), 400
 
-    image_file = request.files["file"]
+    image_file = request.files.get("file")
+    user_input = request.form.get("question", "").strip()
 
     try:
-        # Compress image
         compressed_bytes, mime_type = compress_image(image_file)
-
-        model = google_genai.GenerativeModel("gemini-1.5-flash")
-        image_desc = model.generate_content([
-            "Briefly describe the key elements of this image (50 words).",
-            {
-                "mime_type": mime_type,
-                "data": compressed_bytes
-            }
-        ]).text.strip()
-
+        image_desc = process_image_for_llm(compressed_bytes)
         knowledge_context = knowledge_retriever_tool.invoke(image_desc)
 
-        # Final single Gemini call with both image details + context
+        # Step 3: Run through LangGraph
         prompt_text = (
-            "You are an assistant for ITC Narmada Hotel, Ahmedabad. "
-            "Using the image details and hotel knowledge provided, "
-            "give a short, accurate answer ONLY about this hotel. "
-            "If unrelated, say: 'The image does not seem related to ITC Narmada Hotel.' "
-            "Max 30 words, match user language.\n\n"
-            f"(Note: Always respond in user's input language.)\n\n"
+            "Using the image details and hotel knowledge provided, answer user querys."
+            "give a short, accurate answer."
+            "match user language.\n\n"
             f"Image details: {image_desc}\n"
             f"Hotel knowledge: {knowledge_context}"
+            f"User question: {user_input}"
+            "Always try to frame a proper answer."
         )
 
-        final_response = model.generate_content(prompt_text)
+        config = {"configurable": {"thread_id": "default"}}
+        previous_state = graph.get_state(config).values if graph.get_state(config) else {}
+        state = {
+            "messages": previous_state.get("messages", []) + [HumanMessage(content=prompt_text)]
+        }
+        result = graph.invoke(state, config)
 
-        return jsonify({"response": final_response.text})
-
+        response_text = result["messages"][-1].content
+        
+        return jsonify({"response": response_text})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+            logging.error("Image-chat failed:", exc_info=e)
+            return jsonify({"error": str(e)}), 500
 
 # --- Text chat ---
 @app.route("/chat", methods=["POST"])
@@ -308,6 +336,7 @@ def pcm_to_wav_base64(pcm_bytes: bytes, channels=1, rate=24000, sample_width=2) 
     wav_bytes = buffer.getvalue()
     return base64.b64encode(wav_bytes).decode("utf-8")
     
+# --- Add documents to knowledge base ---
 @app.route("/add-docs", methods=["POST"])
 def add_docs():
     texts = request.form.getlist("texts")
@@ -318,10 +347,11 @@ def add_docs():
 
     return add_to_knowledge_base(texts, files)
 
+# --- Gemini image + text chat ---
 @app.route("/gemini-image-chat", methods=["POST"])
 def vision_chat():
     try:
-        question = request.form.get("question")
+        question = request.form.get("question", "").strip()
         file = request.files.get("file")
 
         if not question or not file:

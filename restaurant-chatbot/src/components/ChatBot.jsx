@@ -16,21 +16,6 @@ const Chatbot = () => {
 
   const SILENCE_TIMEOUT = 1500; // ms of silence before auto-stop
 
-  const FlagIcon = ({ country, className = "w-5 h-5" }) => {
-    const flags = {
-      us: "🇺🇸",
-      in: "🇮🇳",
-    };
-
-    return (
-      <span
-        className={`inline-flex items-center justify-center text-sm ${className}`}
-      >
-        {flags[country]}
-      </span>
-    );
-  };
-
   const handleImageSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
