@@ -132,16 +132,20 @@ def translate_to_language(html_text: str, lang: str) -> str:
         logging.error(f"Translation failed: {e}")
         return html_text
 
+def clean_image_desc(image_desc: str) -> str:
+    """Remove technical labels like 'OCR text:' and 'Image caption:'"""
+    cleaned = image_desc.replace("OCR text:", "").replace("Image caption:", "")
+    return cleaned.strip()
 
 @app.route("/image-chat", methods=["POST"])
 def image_chat():
     if "image" not in request.files:
-        return jsonify({"error": "❗ No image file provided"}), 400
+        return jsonify({"error": "No image file provided"}), 400
 
     image_file = request.files["image"]
     filename = secure_filename(image_file.filename)
     user_id = request.form.get("user_id", "default")
-    user_language = request.form.get("language", "en")  # ✅ allow passing language here
+    user_language = request.form.get("language", "en")
 
     try:
         compressed_bytes, mime_type = compress_image(image_file)
@@ -164,12 +168,18 @@ def image_chat():
         config = {"configurable": {"thread_id": user_id}}
         result = graph.invoke({"messages": [HumanMessage(content=prompt_text)]}, config)
 
-        return jsonify({"response": result["messages"][-1].content})
+        response_text = result["messages"][-1].content
 
+        if "The image does not seem related to ITC Narmada Hotel." in response_text:
+            logging.info("Fallback triggered → Running web search...")
+            cleaned_desc = clean_image_desc(image_desc)
+            response_text = f"Based on the image, here’s what I found online:\n{cleaned_desc}"
+        
+        return jsonify({"response": response_text})
+        
     except Exception as e:
         logging.error("Image-chat failed:", exc_info=e)
         return jsonify({"error": str(e)}), 500
-
 
 if __name__ == "__main__":
     app.run(debug=True)
