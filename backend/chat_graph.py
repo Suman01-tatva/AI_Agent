@@ -9,6 +9,8 @@ from datetime import date
 from typing import TypedDict, Annotated, Sequence
 from langgraph.graph.message import add_messages
 from langgraph.checkpoint.memory import MemorySaver
+import psycopg
+from langgraph.checkpoint.postgres import PostgresSaver
 from tools import all_tools
 from knowledge_base import knowledge_tools
 from gemini_tool import gemini_tool
@@ -74,6 +76,11 @@ def call_tool(state: AgentState) -> AgentState:
 def should_continue(state: AgentState) -> bool:
     return len(getattr(state["messages"][-1], "tool_calls", [])) > 0
 
+DB_URI = os.getenv("DB_URI")
+conn = psycopg.connect(DB_URI, autocommit=True)
+checkpointer = PostgresSaver(conn=conn)
+checkpointer.setup()
+
 def build_chat_graph():
     workflow = StateGraph(AgentState)
     # Add nodes
@@ -82,5 +89,6 @@ def build_chat_graph():
     workflow.add_edge(START, "agent")
     workflow.add_conditional_edges("agent", should_continue, {True: "tool", False: END})
     workflow.add_edge("tool", "agent")
-    agent = workflow.compile(checkpointer=MemorySaver())
+    # agent = workflow.compile(checkpointer=MemorySaver())
+    agent = workflow.compile(checkpointer=checkpointer)
     return agent

@@ -536,12 +536,6 @@ const ChatBotFinal = () => {
                 />
               </svg>
             </button>
-
-            <div className="flex space-x-1">
-              <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-              <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-              <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-            </div>
           </div>
         </div>
 

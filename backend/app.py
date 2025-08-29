@@ -11,7 +11,7 @@ import easyocr
 reader = easyocr.Reader(['en'])
 from faster_whisper import WhisperModel
 import google.generativeai as google_genai
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, AIMessage
 from io import BytesIO
 from PIL import Image
 import base64
@@ -30,6 +30,8 @@ if not GOOGLE_API_KEY:
     raise RuntimeError("Set GOOGLE_API_KEY in .env or environment variables.")
 
 # ---------- Config ----------
+user_id = "user1"  # In real app, get from auth/session
+thread_id = "thread1"  # Could be dynamic per conversation
 os.environ["LANGCHAIN_TRACING_V2"] = "false"
 
 WHISPER_MODEL = "large-v3-turbo"
@@ -129,12 +131,11 @@ def image_chat():
             "Always try to frame a proper answer."
         )
 
-        config = {"configurable": {"thread_id": "default"}}
-        previous_state = graph.get_state(config).values if graph.get_state(config) else {}
-        state = {
-            "messages": previous_state.get("messages", []) + [HumanMessage(content=prompt_text)]
-        }
-        result = graph.invoke(state, config)
+        config = {"configurable": {"thread_id": f"{user_id}-{thread_id}"}}
+        result = graph.invoke(
+            {"messages": [HumanMessage(content=prompt_text)]},
+            config=config
+        )
 
         response_text = result["messages"][-1].content
         
@@ -156,15 +157,20 @@ def chat():
         return jsonify({"error": "No message provided"}), 400
 
     # Load previous state or initialize new
-    config = {"configurable": {"thread_id": "default"}}
-    previous_state = graph.get_state(config).values if graph.get_state(config) else {}
-    state = {
-        "messages": previous_state.get("messages", []) + [HumanMessage(content=user_input)]
-    }
-    print("State messages:", [msg.content for msg in state["messages"]])
+    config = {"configurable": {"thread_id": f"{user_id}-{thread_id}"}}
+    # previous_state = graph.get_state(config).values if graph.get_state(config) else {}
+    # state = {
+    #     "messages": previous_state.get("messages", []) + [HumanMessage(content=user_input)]
+    # }
+    # print("State messages:", [msg.content for msg in state["messages"]])
         
     try:
-        result = graph.invoke(state, config=config)
+        # result = graph.invoke(state, config=config)
+        result = graph.invoke(
+            {"messages": [HumanMessage(content=user_input)]},
+            config=config
+        )
+        print("Final messages:", [msg.content for msg in result["messages"]])
     except Exception as e:
         logging.error("LangGraph invocation failed:", exc_info=e)
         return jsonify({"response": "Something went wrong with the chatbot."})
@@ -389,7 +395,9 @@ def run_agent_multimodal(user_text: str, image_bytes: bytes) -> str:
 
     # Encode image as base64
     b64_img = base64.b64encode(image_bytes).decode("utf-8")
-
+    config = {"configurable": {"thread_id": f"{user_id}-{thread_id}"}}
+    snapshot = graph.get_state(config)
+    previous_state = snapshot.values if snapshot.values else {"messages": []}
     # Send multimodal request to Gemini
     response = client.models.generate_content(
         model=LLM_MODEL,
@@ -408,9 +416,14 @@ def run_agent_multimodal(user_text: str, image_bytes: bytes) -> str:
             )
         ]
     )
-
+    final_response = response.candidates[0].content.parts[0].text
+    new_messages = previous_state["messages"] + [
+        HumanMessage(content=user_text+"\n Image : {b64_img}"),
+        AIMessage(content=final_response)
+    ]
+    graph.update_state(config, {"messages": new_messages})
     # Return model’s text reply
-    return response.candidates[0].content.parts[0].text
+    return final_response
 
 if __name__ == "__main__":
     app.run(debug=True)
