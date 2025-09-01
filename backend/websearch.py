@@ -14,15 +14,18 @@ load_dotenv()
 EMBED_MODEL = SentenceTransformer("all-MiniLM-L6-v2")
 
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
-async def search_web(query: str, max_results: int = 5) -> List[Document]:
+async def search_web(query: str, max_results: int = 2, repeats: int = 3) -> List[Document]:
     # Step 1: DuckDuckGo Search
     def do_search():
         with DDGS() as ddgs:
             return list(ddgs.text(query, max_results=max_results))
-
-    results = await asyncio.to_thread(do_search)
-    urls = [r.get('href') or r.get('url') for r in results if r.get('href') or r.get('url')]
-    print("🔎 Found URLs:", urls)
+    all_urls = []
+    for _ in range(repeats):
+        results = await asyncio.to_thread(do_search)
+        for r in results:
+            if r.get('href') or r.get('url') and (r.get('href') or r.get('url')) not in all_urls:
+                all_urls.append(r.get('href') or r.get('url'))
+    print("🔎 Found URLs:", all_urls)
 
     # Step 2: Scrape & Clean
     async def extract_from_url(url):
@@ -44,7 +47,7 @@ async def search_web(query: str, max_results: int = 5) -> List[Document]:
         except Exception as e:
             return [Document(page_content=f"Failed to scrape: {str(e)}", metadata={"url": url})]
         
-    tasks = [wait_for(extract_from_url(url), timeout=15) for url in urls[:max_results]]
+    tasks = [wait_for(extract_from_url(url), timeout=15) for url in all_urls[:max_results*repeats]]
     
     results = await asyncio.gather(*tasks,return_exceptions=True)
     all_chunks = []
@@ -73,7 +76,7 @@ def rank_snippets(query: str, documents: List[Document]) -> List[Document]:
     return sorted(ranked_docs, key=lambda d: d.metadata.get("score", 0), reverse=True)
 
 # Full pipeline
-async def custom_web_search(query: str, max_results: int = 5) -> List[Document]:
-    web_docs = await search_web(query, max_results)
+async def custom_web_search(query: str) -> List[Document]:
+    web_docs = await search_web(query)
     ranked_docs = rank_snippets(query, web_docs)
     return ranked_docs
