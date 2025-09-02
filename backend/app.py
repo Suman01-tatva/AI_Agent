@@ -8,7 +8,10 @@ import re
 import logging
 import cv2
 import easyocr
-reader = easyocr.Reader(['en'])
+reader = easyocr.Reader(
+    ['en'],
+    model_storage_directory="D:/Project/chatbot_final/AI_Agent/backend/models/easyocr"
+)
 from faster_whisper import WhisperModel
 import google.generativeai as google_genai
 from langchain_core.messages import HumanMessage, AIMessage
@@ -22,7 +25,7 @@ import wave
 import io
 import tempfile
 from knowledge_base import knowledge_retriever_tool
-
+ 
 # ---------- Load env ----------
 load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
@@ -435,5 +438,11 @@ def widget_page():
 def assets(filename):
     return send_from_directory(f"{app.static_folder}/assets", filename)
 
-if __name__ == "__main__":
-    app.run(debug=True)
+@app.route("/")
+def hello():
+    return jsonify({"status": "ok", "message": "Flask backend is running."})
+
+application = app
+
+# if __name__ == "__main__":
+#     app.run(debug=True,port=5001)
