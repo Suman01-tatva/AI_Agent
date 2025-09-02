@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import parse from "html-react-parser";
+import itc_logo from "../../public/ITC-Hotels-logo.svg"
 
 const ChatBotFinal = () => {
   const [messages, setMessages] = useState([]);
@@ -494,10 +495,10 @@ const ChatBotFinal = () => {
 
   return (
     <div className="flex justify-center">
-      <div className="flex flex-col h-[85vh] w-full max-w-2xl bg-white rounded-3xl shadow-sm overflow-hidden border border-gray-100">
+      <div className="flex flex-col h-[85vh] w-full max-w-2xl bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-200">
         {/* Header */}
         <div className="inline-flex items-center justify-between mt-3 bg-gradient-to-b from-gray-50 to-white p-2 px-5 rounded shadow-lg">
-          <img src="ITC-Hotels-logo.svg" alt="" />
+          <img src={itc_logo} alt="" />
           <div className="flex items-center">
             {/* Language Selector (from first code) */}
             <div className="flex items-center gap-2">

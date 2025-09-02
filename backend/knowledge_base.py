@@ -1,6 +1,7 @@
 from langchain_core.documents import Document
 from langchain_core.tools import tool
 from langchain_community.vectorstores import FAISS
+from langchain_community.vectorstores import PGVector
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader
@@ -20,6 +21,8 @@ from flask import jsonify
 # ---------- Config ----------
 EMBED_MODEL = "models/text-embedding-004"
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
+# COLLECTION_NAME = "my_documents"
+# CONNECTION_STRING = os.getenv("CONNECTION_STRING")
 
 # -- File Paths ---
 JSON_PATH = os.path.join(os.path.dirname(__file__), "restaurant-data.json")
@@ -125,6 +128,12 @@ try:
         # documents.extend(scrape_website(os.getenv("SITE_URL")))
         # documents.extend(pdf_to_document(PDF_PATH))
         chunks = text_splitter.split_documents(documents)
+        # vector_store = PGVector.from_documents(
+        #     documents=chunks,
+        #     embedding=embeddings,
+        #     collection_name=COLLECTION_NAME,
+        #     connection_string=CONNECTION_STRING,
+        # )
         vector_store = FAISS.from_documents(chunks, embeddings)
         vector_store.save_local(FAISS_STORE_DIR)
         global_vector_store = vector_store
@@ -133,6 +142,11 @@ try:
             f.write(current_hash or "")
         logging.info("💾 FAISS vector store rebuilt and saved.")
     else:
+        # vector_store = PGVector(
+        #     embedding_function=embeddings,
+        #     collection_name=COLLECTION_NAME,
+        #     connection_string=CONNECTION_STRING,
+        # )
         vector_store = FAISS.load_local(
             FAISS_STORE_DIR, embeddings, allow_dangerous_deserialization=True
         )

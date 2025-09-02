@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os
@@ -45,9 +45,10 @@ TTS_MODEL_ID = "eleven_multilingual_v2"
 STT_MODEL_ID = "scribe_v1"
 
 # Flask app setup
-app = Flask(__name__)
+app = Flask(__name__,static_folder="dist")
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "secret-key")
-CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
+# CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 whisperModel = WhisperModel(WHISPER_MODEL, compute_type=WHISPER_COMPUTE_TYPE)
 client = genai.Client()
@@ -424,6 +425,15 @@ def run_agent_multimodal(user_text: str, image_bytes: bytes) -> str:
     graph.update_state(config, {"messages": new_messages})
     # Return model’s text reply
     return final_response
+
+@app.route("/widget.html")
+def widget_page():
+    return send_from_directory(app.static_folder, "index.html")
+
+# Serve assets (css/js/images)
+@app.route("/assets/<path:filename>")
+def assets(filename):
+    return send_from_directory(f"{app.static_folder}/assets", filename)
 
 if __name__ == "__main__":
     app.run(debug=True)
