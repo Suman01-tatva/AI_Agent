@@ -47,7 +47,7 @@ STT_MODEL_ID = "scribe_v1"
 # Flask app setup
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "secret-key")
-CORS(app, origins=["http://localhost:5173", "https://your-frontend-domain.com"], supports_credentials=True)
+CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
 
 whisperModel = WhisperModel(WHISPER_MODEL, compute_type=WHISPER_COMPUTE_TYPE)
 client = genai.Client()
