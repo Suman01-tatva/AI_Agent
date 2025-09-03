@@ -33,8 +33,6 @@ if not GOOGLE_API_KEY:
     raise RuntimeError("Set GOOGLE_API_KEY in .env or environment variables.")
 
 # ---------- Config ----------
-user_id = "user1"  # In real app, get from auth/session
-thread_id = "thread1"  # Could be dynamic per conversation
 os.environ["LANGCHAIN_TRACING_V2"] = "false"
 
 WHISPER_MODEL = "large-v3-turbo"
@@ -118,7 +116,7 @@ def image_chat():
 
     image_file = request.files.get("file")
     user_input = request.form.get("question", "").strip()
-
+    thread_id = request.form.get("thread_id", "").strip()
     try:
         compressed_bytes, mime_type = compress_image(image_file)
         image_desc = process_image_for_llm(compressed_bytes)
@@ -135,7 +133,7 @@ def image_chat():
             "Always try to frame a proper answer."
         )
 
-        config = {"configurable": {"thread_id": f"{user_id}-{thread_id}"}}
+        config = {"configurable": {"thread_id": {thread_id}}}
         result = graph.invoke(
             {"messages": [HumanMessage(content=prompt_text)]},
             config=config
@@ -156,12 +154,12 @@ def chat():
 
     data = request.get_json()
     user_input = data.get("message", "").strip()
-
+    thread_id = data.get("thread_id", "").strip()
     if not user_input:
         return jsonify({"error": "No message provided"}), 400
 
     # Load previous state or initialize new
-    config = {"configurable": {"thread_id": f"{user_id}-{thread_id}"}}
+    config = {"configurable": {"thread_id": {thread_id}}}
     # previous_state = graph.get_state(config).values if graph.get_state(config) else {}
     # state = {
     #     "messages": previous_state.get("messages", []) + [HumanMessage(content=user_input)]
@@ -363,7 +361,7 @@ def vision_chat():
     try:
         question = request.form.get("question", "").strip()
         file = request.files.get("file")
-
+        thread_id = request.form.get("thread_id", "").strip()
         if not question or not file:
             return jsonify({"detail": "Missing question or file"}), 400
 
@@ -371,14 +369,14 @@ def vision_chat():
         content = file.read()
 
         # Run multimodal agent
-        reply = run_agent_multimodal(question, content)
+        reply = run_agent_multimodal(question, content, thread_id)
 
     except Exception as e:
         return jsonify({"detail": f"Multimodal error: {e}"}), 500
 
     return jsonify({"response": reply})
 
-def run_agent_multimodal(user_text: str, image_bytes: bytes) -> str:
+def run_agent_multimodal(user_text: str, image_bytes: bytes , thread_id: str) -> str:
     """Send text + image (as bytes) to Google GenAI multimodal model."""
 
     # Default MIME type
@@ -399,7 +397,7 @@ def run_agent_multimodal(user_text: str, image_bytes: bytes) -> str:
 
     # Encode image as base64
     b64_img = base64.b64encode(image_bytes).decode("utf-8")
-    config = {"configurable": {"thread_id": f"{user_id}-{thread_id}"}}
+    config = {"configurable": {"thread_id": {thread_id}}}
     snapshot = graph.get_state(config)
     previous_state = snapshot.values if snapshot.values else {"messages": []}
     # Send multimodal request to Gemini

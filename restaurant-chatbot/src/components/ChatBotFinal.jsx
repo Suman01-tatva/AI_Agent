@@ -2,6 +2,11 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import parse from "html-react-parser";
 import itc_logo from "../../public/ITC-Hotels-logo.svg"
 
+const params = new URLSearchParams(window.location.search);
+const userId = params.get("user_id") || "default_user";
+const appId = params.get("app_id") || "default_app";
+const threadId = appId + "_" + userId;
+
 const ChatBotFinal = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -311,7 +316,7 @@ const ChatBotFinal = () => {
     const formData = new FormData();
     formData.append("file", selectedImage);
     formData.append("question", input || "Describe this image");
-
+    formData.append("thread_id", threadId);
     try {
       const res = await fetch("http://192.168.1.71:5000/image-chat", {
         method: "POST",
@@ -387,7 +392,7 @@ const ChatBotFinal = () => {
         const response = await fetch("http://192.168.1.71:5000/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: newMessage }),
+          body: JSON.stringify({ message: newMessage, thread_id: threadId }),
         });
 
         const data = await response.json();
@@ -495,9 +500,9 @@ const ChatBotFinal = () => {
 
   return (
     <div className="flex justify-center">
-      <div className="flex flex-col h-[85vh] w-full max-w-2xl bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-200">
+      <div className="flex flex-col h-[85vh] w-full max-w-2xl rounded-3xl shadow-lg overflow-hidden border border-gray-200">
         {/* Header */}
-        <div className="inline-flex items-center justify-between mt-3 bg-gradient-to-b from-gray-50 to-white p-2 px-5 rounded shadow-lg">
+        <div className="inline-flex items-center justify-between bg-gradient-to-b from-gray-50 to-white p-2 px-5 rounded shadow-lg">
           <img src={itc_logo} alt="" />
           <div className="flex items-center">
             {/* Language Selector (from first code) */}
@@ -518,7 +523,7 @@ const ChatBotFinal = () => {
               </select>
             </div>
 
-            <button
+            {/* <button
               onClick={() => docInputRef.current?.click()}
               className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg"
               title="Upload Documents (PDF, DOCX, JSON)"
@@ -536,15 +541,15 @@ const ChatBotFinal = () => {
                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 />
               </svg>
-            </button>
+            </button> */}
           </div>
         </div>
 
         {/* Chat Window */}
         <div className="flex-1 overflow-y-auto px-6">
           {messages.length === 0 && (
-            <div className="py-8">
-              <div className="mb-8">
+            <div className="py-6">
+              <div className="mb-6">
                 <p className="text-gray-600 text-base leading-relaxed mb-6">
                   Hi 👋 I am a smart chat bot, I can process image and text!
                 </p>
@@ -553,7 +558,7 @@ const ChatBotFinal = () => {
           )}
 
           {messages.map((msg, idx) => (
-            <div key={idx} className={`py-4 ${idx === 0 ? "pt-8" : ""}`}>
+            <div key={idx} className={`py-1 ${idx === 0 ? "pt-6" : ""}`}>
               <div
                 className={`flex ${
                   msg.role === "user" ? "justify-end" : "justify-start"
@@ -563,11 +568,11 @@ const ChatBotFinal = () => {
                   className={`max-w-[80%] ${
                     msg.role === "user"
                       ? "bg-gray-900 text-white rounded-3xl rounded-br-lg"
-                      : "bg-gray-50 text-gray-800 rounded-3xl rounded-bl-lg"
+                      : "bg-gray-300 text-gray-800 rounded-3xl rounded-bl-lg"
                   } px-4 py-4`}
                 >
                   {msg.parts.length>1 && msg.parts[1].image && (
-                    <div className="mb-3">
+                    <div className="mb-2">
                       <img
                         src={msg.parts[1].image}
                         alt="Shared image"
@@ -720,10 +725,10 @@ const ChatBotFinal = () => {
         )}
 
         {/* Input Area */}
-        <div className="p-6 border-t border-gray-100">
+        <div className="px-6 py-2 border-t border-gray-300">
           <div className="relative">
             <textarea
-              className="w-full pr-32 pl-12 pt-5 bg-gray-50 border-0 rounded-2xl focus:outline-none focus:ring-0 resize-none placeholder-gray-400 text-sm"
+              className="w-full pr-32 pl-12 pt-5 bg-gray-100 border-0 rounded-2xl focus:outline-none focus:ring-0 resize-none placeholder-gray-400 text-sm"
               placeholder="Ask me anything"
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -850,12 +855,6 @@ const ChatBotFinal = () => {
               </div>
             </div>
           )}
-        </div>
-
-        <div className="px-6 pb-3 text-center">
-          <p className="text-xs text-gray-400">
-            Sometimes I make mistakes, if so click the ↻ restart button
-          </p>
         </div>
       </div>
     </div>
