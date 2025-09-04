@@ -195,3 +195,190 @@
 2025-09-04 14:18:05.195659: wfastcgi.py 3.0.0 initializing
 2025-09-04 14:18:32.767412: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
 2025-09-04 14:18:32.774578: wfastcgi.py 3.0.0 initialized
+2025-09-04 17:50:05.694699: wfastcgi.py 3.0.0 started
+2025-09-04 17:50:05.702158: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 17:50:05.709004: wfastcgi.py 3.0.0 initializing
+2025-09-04 17:50:38.068250: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 17:50:38.075583: wfastcgi.py 3.0.0 initialized
+2025-09-04 17:50:38.264710: wfastcgi.py 3.0.0 started
+2025-09-04 17:50:38.273398: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 17:50:38.280126: wfastcgi.py 3.0.0 initializing
+2025-09-04 17:51:00.249875: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 17:51:00.257112: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:05:22.837111: wfastcgi.py 3.0.0 started
+2025-09-04 18:05:22.847779: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:05:22.854978: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:05:46.855825: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:05:46.870191: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:05:47.062870: wfastcgi.py 3.0.0 started
+2025-09-04 18:05:47.069070: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:05:47.075851: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:06:09.116325: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:06:09.122904: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:18:56.617837: wfastcgi.py 3.0.0 started
+2025-09-04 18:18:56.624192: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:18:56.631748: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:19:29.257991: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:19:29.266295: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:19:29.381765: wfastcgi.py 3.0.0 started
+2025-09-04 18:19:29.388240: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:19:29.395391: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:19:52.342023: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:19:52.352094: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:24:13.203991: wfastcgi.py exiting because app.py has changed, matching .*((\.py)|(\.config))$
+2025-09-04 18:24:13.211311: Running on_exit tasks
+2025-09-04 18:25:35.572661: wfastcgi.py 3.0.0 started
+2025-09-04 18:25:35.579139: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:25:35.585860: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:26:00.994819: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:26:01.001732: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:26:01.670259: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:26:01.677070: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:26:33.736005: wfastcgi.py exiting because app.py has changed, matching .*((\.py)|(\.config))$
+2025-09-04 18:26:33.736125: wfastcgi.py exiting because app.py has changed, matching .*((\.py)|(\.config))$
+2025-09-04 18:26:33.745423: Running on_exit tasks
+2025-09-04 18:28:22.185352: wfastcgi.py 3.0.0 started
+2025-09-04 18:28:22.191850: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:28:22.199173: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:28:48.101424: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:28:48.108436: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:28:48.409325: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:28:48.417027: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:33:51.903268: wfastcgi.py exiting because app.py has changed, matching .*((\.py)|(\.config))$
+2025-09-04 18:33:51.909634: Running on_exit tasks
+2025-09-04 18:34:36.725565: wfastcgi.py 3.0.0 started
+2025-09-04 18:34:36.734933: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:34:36.742284: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:34:59.954537: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:34:59.962483: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:35:00.083201: wfastcgi.py 3.0.0 started
+2025-09-04 18:35:00.089439: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:35:00.095884: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:35:22.759597: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:35:22.766257: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:36:13.334107: wfastcgi.py exiting because app.py has changed, matching .*((\.py)|(\.config))$
+2025-09-04 18:36:13.342836: wfastcgi.py exiting because app.py has changed, matching .*((\.py)|(\.config))$
+2025-09-04 18:36:13.342920: Running on_exit tasks
+2025-09-04 18:36:13.350878: Running on_exit tasks
+2025-09-04 18:36:41.853622: wfastcgi.py 3.0.0 started
+2025-09-04 18:36:41.859981: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:36:41.866452: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:37:04.824405: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:37:04.831492: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:37:04.944606: wfastcgi.py 3.0.0 started
+2025-09-04 18:37:04.950558: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:37:04.958425: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:37:28.303098: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:37:28.310102: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:38:02.606515: wfastcgi.py exiting because app.py has changed, matching .*((\.py)|(\.config))$
+2025-09-04 18:38:02.614725: Running on_exit tasks
+2025-09-04 18:38:13.165687: wfastcgi.py 3.0.0 started
+2025-09-04 18:38:13.176295: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:38:13.184510: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:38:35.920724: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:38:35.931832: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:38:36.123396: wfastcgi.py 3.0.0 started
+2025-09-04 18:38:36.129541: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:38:36.135574: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:38:59.142100: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:38:59.148638: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:39:11.096677: wfastcgi.py exiting because app.py has changed, matching .*((\.py)|(\.config))$
+2025-09-04 18:39:11.105509: Running on_exit tasks
+2025-09-04 18:39:15.240233: wfastcgi.py 3.0.0 started
+2025-09-04 18:39:15.248486: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:39:15.255903: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:39:16.600253: wfastcgi.py 3.0.0 started
+2025-09-04 18:39:16.607001: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:39:16.617135: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:39:43.576592: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:39:43.583608: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:39:44.604066: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:39:44.614355: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:39:46.101722: wfastcgi.py exiting because app.py has changed, matching .*((\.py)|(\.config))$
+2025-09-04 18:39:46.109633: Running on_exit tasks
+2025-09-04 18:39:49.237052: wfastcgi.py 3.0.0 started
+2025-09-04 18:39:49.245135: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:39:49.253060: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:40:15.448529: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:40:15.456305: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:40:16.080906: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:40:16.088021: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:41:41.226302: wfastcgi.py 3.0.0 started
+2025-09-04 18:41:41.233879: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:41:41.241236: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:42:02.880936: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:42:02.888457: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:42:03.024426: wfastcgi.py 3.0.0 started
+2025-09-04 18:42:03.030650: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:42:03.038132: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:42:25.710800: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:42:25.717240: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:44:38.927184: wfastcgi.py exiting because app.py has changed, matching .*((\.py)|(\.config))$
+2025-09-04 18:44:38.933771: Running on_exit tasks
+2025-09-04 18:45:02.421503: wfastcgi.py 3.0.0 started
+2025-09-04 18:45:02.430508: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:45:02.436977: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:45:25.802042: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:45:25.812691: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:45:25.959029: wfastcgi.py 3.0.0 started
+2025-09-04 18:45:25.966265: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:45:25.972646: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:45:48.964900: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:45:48.971416: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:48:45.341023: wfastcgi.py exiting because app.py has changed, matching .*((\.py)|(\.config))$
+2025-09-04 18:48:45.352540: Running on_exit tasks
+2025-09-04 18:48:45.369427: Running on_exit tasks
+2025-09-04 18:48:50.967831: wfastcgi.py 3.0.0 started
+2025-09-04 18:48:50.978685: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:48:50.986439: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:48:50.986448: wfastcgi.py 3.0.0 started
+2025-09-04 18:48:50.994596: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:48:51.001673: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:49:00.557924: wfastcgi.py 3.0.0 started
+2025-09-04 18:49:00.567166: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:49:00.576629: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:49:18.239535: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:49:18.249136: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:49:18.264098: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:49:18.270740: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:49:29.645565: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:49:29.659830: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:49:47.269805: wfastcgi.py exiting because app.py has changed, matching .*((\.py)|(\.config))$
+2025-09-04 18:49:47.269868: wfastcgi.py exiting because app.py has changed, matching .*((\.py)|(\.config))$
+2025-09-04 18:49:47.279299: Running on_exit tasks
+2025-09-04 18:49:47.279561: Running on_exit tasks
+2025-09-04 18:49:54.322149: wfastcgi.py 3.0.0 started
+2025-09-04 18:49:54.328726: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:49:54.335153: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:50:19.965434: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:50:19.975728: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:50:20.090865: wfastcgi.py 3.0.0 started
+2025-09-04 18:50:20.097918: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:50:20.104359: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:50:41.757973: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:50:41.765130: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:52:56.348706: wfastcgi.py exiting because app.py has changed, matching .*((\.py)|(\.config))$
+2025-09-04 18:52:56.362526: Running on_exit tasks
+2025-09-04 18:53:02.298920: wfastcgi.py 3.0.0 started
+2025-09-04 18:53:02.308060: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:53:02.314407: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:53:09.760548: wfastcgi.py 3.0.0 started
+2025-09-04 18:53:09.768534: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:53:09.776885: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:53:26.905718: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:53:26.913371: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:53:35.456453: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:53:35.463632: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:54:34.124821: wfastcgi.py exiting because app.py has changed, matching .*((\.py)|(\.config))$
+2025-09-04 18:54:34.133081: Running on_exit tasks
+2025-09-04 18:54:34.133107: Running on_exit tasks
+2025-09-04 18:54:47.151030: wfastcgi.py 3.0.0 started
+2025-09-04 18:54:47.157290: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:54:47.166251: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:55:09.855434: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:55:09.862417: wfastcgi.py 3.0.0 initialized
+2025-09-04 18:55:10.403243: wfastcgi.py 3.0.0 started
+2025-09-04 18:55:10.409560: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 18:55:10.416950: wfastcgi.py 3.0.0 initializing
+2025-09-04 18:55:32.073933: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 18:55:32.080592: wfastcgi.py 3.0.0 initialized

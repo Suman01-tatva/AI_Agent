@@ -463,9 +463,15 @@ def widget_page():
 def assets(filename):
     return send_from_directory(f"{app.static_folder}/assets", filename)
 
-@app.route("/")
+@app.route("/", methods=["GET"])
 def hello():
-    return jsonify({"status": "ok", "message": "Flask backend is running."})
+    thread_id = request.args.get("thread_id")
+    logger.info(f"Health check. thread_id: {thread_id}")
+    config = {"configurable": {"thread_id": thread_id}}
+    snapshot = graph.get_state(config)
+    logging.info(f"Snapshot: {snapshot}")
+    previous_state = snapshot.values if snapshot.values else {"messages": []}
+    return jsonify({"history": [{"role" : "model" if msg.type == "ai" else "user", "parts" : [{ "text": msg.content }]} for msg in previous_state["messages"] if msg.type != "tool" and msg.content.strip() != ""]})
 
 application = app
 

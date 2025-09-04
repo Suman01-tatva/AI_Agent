@@ -78,6 +78,20 @@ const ChatBotFinal = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    const getPreviousChat = async () => {
+      const response = await fetch(`https://192.168.1.71:443/?thread_id=${threadId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(data.history || []);
+      }
+    }
+    getPreviousChat();
+  },[])
+
   // Handle image selection
   const handleImageSelect = (e) => {
     const file = e.target.files[0];
