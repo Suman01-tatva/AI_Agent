@@ -72,6 +72,19 @@ const ChatBotFinal = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    const getPreviousChat = async () => {
+      const response = await fetch("http://localhost:5000", {
+        method: "GET",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(data.history || []);
+      }
+    }
+    getPreviousChat();
+  },[])
+
   // Handle image selection
   const handleImageSelect = (e) => {
     const file = e.target.files[0];
