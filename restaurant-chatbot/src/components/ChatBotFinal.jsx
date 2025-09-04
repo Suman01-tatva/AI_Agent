@@ -146,7 +146,7 @@ const ChatBotFinal = () => {
         formData.append("files", file);
       });
 
-      const res = await fetch("http://192.168.1.71:5000/add-docs", {
+      const res = await fetch("https://192.168.1.71:443/add-docs", {
         method: "POST",
         body: formData,
       });
@@ -262,7 +262,7 @@ const ChatBotFinal = () => {
     formData.append("language", language);
 
     try {
-      const sttRes = await fetch("http://192.168.1.71:5000/whisper-stt", {
+      const sttRes = await fetch("https://192.168.1.71:443/whisper-stt", {
         method: "POST",
         body: formData,
       });
@@ -281,7 +281,7 @@ const ChatBotFinal = () => {
 
   const playAudio = useCallback(async (botReply) => {
     try {
-      const ttsRes = await fetch("http://192.168.1.71:5000/gemini-tts", {
+      const ttsRes = await fetch("https://192.168.1.71:443/gemini-tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: botReply, language }),
@@ -318,7 +318,7 @@ const ChatBotFinal = () => {
     formData.append("question", input || "Describe this image");
     formData.append("thread_id", threadId);
     try {
-      const res = await fetch("http://192.168.1.71:5000/image-chat", {
+      const res = await fetch("https://192.168.1.71:443/image-chat", {
         method: "POST",
         body: formData,
       });
@@ -389,7 +389,7 @@ const ChatBotFinal = () => {
       setInput("");
 
       try {
-        const response = await fetch("http://192.168.1.71:5000/chat", {
+        const response = await fetch("https://192.168.1.71:443/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: newMessage, thread_id: threadId }),

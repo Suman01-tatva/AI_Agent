@@ -1,227 +1,197 @@
-2025-09-02 18:04:08.918356: wfastcgi.py 3.0.0 started
-2025-09-02 18:04:08.928136: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
-2025-09-02 18:04:08.935121: wfastcgi.py 3.0.0 initializing
-2025-09-02 18:04:23.715427: Error occurred while reading WSGI handler:
-
-Traceback (most recent call last):
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 791, in main
-    env, handler = read_wsgi_handler(response.physical_path)
-                   ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 633, in read_wsgi_handler
-    handler = get_wsgi_handler(os.getenv("WSGI_HANDLER"))
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 600, in get_wsgi_handler
-    handler = __import__(module_name, fromlist=[name_list[0][0]])
-  File "D:\Project\chatbot_final\AI_Agent\backend\app.py", line 30, in <module>
-    with open(r"D:\Project\myapp\whoami.log", "w") as f:
-         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-FileNotFoundError: [Errno 2] No such file or directory: 'D:\\Project\\myapp\\whoami.log'
-
-
-StdOut: 
-
-StdErr: Neither CUDA nor MPS are available - defaulting to CPU. Note: This module is much faster with a GPU.
-D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\ctranslate2\__init__.py:8: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  import pkg_resources
-2025-09-02 18:04:23.726818: Unhandled exception in wfastcgi.py: Traceback (most recent call last):
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 791, in main
-    env, handler = read_wsgi_handler(response.physical_path)
-                   ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 633, in read_wsgi_handler
-    handler = get_wsgi_handler(os.getenv("WSGI_HANDLER"))
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 600, in get_wsgi_handler
-    handler = __import__(module_name, fromlist=[name_list[0][0]])
-  File "D:\Project\chatbot_final\AI_Agent\backend\app.py", line 30, in <module>
-    with open(r"D:\Project\myapp\whoami.log", "w") as f:
-         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-FileNotFoundError: [Errno 2] No such file or directory: 'D:\\Project\\myapp\\whoami.log'
-2025-09-02 18:04:23.739745: Running on_exit tasks
-2025-09-02 18:04:23.750338: wfastcgi.py 3.0.0 closed
-2025-09-02 18:05:11.015403: wfastcgi.py 3.0.0 started
-2025-09-02 18:05:11.023466: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
-2025-09-02 18:05:11.031731: wfastcgi.py 3.0.0 initializing
-2025-09-02 18:05:33.166791: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
-2025-09-02 18:05:33.175045: wfastcgi.py 3.0.0 initialized
-2025-09-02 18:05:40.119619: wfastcgi.py 3.0.0 started
-2025-09-02 18:05:40.129020: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
-2025-09-02 18:05:40.136690: wfastcgi.py 3.0.0 initializing
-2025-09-02 18:06:01.692008: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
-2025-09-02 18:06:01.701043: wfastcgi.py 3.0.0 initialized
-2025-09-02 18:19:41.265050: wfastcgi.py 3.0.0 started
-2025-09-02 18:19:41.272484: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
-2025-09-02 18:19:41.279742: wfastcgi.py 3.0.0 initializing
-2025-09-02 18:20:03.169229: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
-2025-09-02 18:20:03.176972: wfastcgi.py 3.0.0 initialized
-2025-09-02 18:21:42.534867: wfastcgi.py 3.0.0 started
-2025-09-02 18:21:42.542840: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
-2025-09-02 18:21:42.550140: wfastcgi.py 3.0.0 initializing
-2025-09-02 18:22:05.078105: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
-2025-09-02 18:22:05.086578: wfastcgi.py 3.0.0 initialized
-2025-09-02 18:26:22.937586: wfastcgi.py 3.0.0 started
-2025-09-02 18:26:22.944910: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
-2025-09-02 18:26:22.952216: wfastcgi.py 3.0.0 initializing
-2025-09-02 18:26:29.475490: wfastcgi.py 3.0.0 started
-2025-09-02 18:26:29.483301: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
-2025-09-02 18:26:29.491237: wfastcgi.py 3.0.0 initializing
-2025-09-02 18:26:41.393954: Error occurred while reading WSGI handler:
-
-Traceback (most recent call last):
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 791, in main
-    env, handler = read_wsgi_handler(response.physical_path)
-                   ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 633, in read_wsgi_handler
-    handler = get_wsgi_handler(os.getenv("WSGI_HANDLER"))
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 600, in get_wsgi_handler
-    handler = __import__(module_name, fromlist=[name_list[0][0]])
-  File "D:\Project\chatbot_final\AI_Agent\backend\app.py", line 61, in <module>
-    from chat_graph import build_chat_graph
-  File "D:\Project\chatbot_final\AI_Agent\backend\chat_graph.py", line 80, in <module>
-    conn = psycopg.connect(DB_URI, autocommit=True)
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\psycopg\connection.py", line 118, in connect
-    raise last_ex.with_traceback(None)
-psycopg.OperationalError: connection failed: connection to server at "192.168.1.71", port 5432 failed: FATAL:  no pg_hba.conf entry for host "192.168.1.71", user "postgres", database "ChatGraphDB", no encryption
-
-
-StdOut: 
-
-StdErr: Neither CUDA nor MPS are available - defaulting to CPU. Note: This module is much faster with a GPU.
-D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\ctranslate2\__init__.py:8: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  import pkg_resources
-2025-09-02 18:26:41.403695: Unhandled exception in wfastcgi.py: Traceback (most recent call last):
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 791, in main
-    env, handler = read_wsgi_handler(response.physical_path)
-                   ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 633, in read_wsgi_handler
-    handler = get_wsgi_handler(os.getenv("WSGI_HANDLER"))
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 600, in get_wsgi_handler
-    handler = __import__(module_name, fromlist=[name_list[0][0]])
-  File "D:\Project\chatbot_final\AI_Agent\backend\app.py", line 61, in <module>
-    from chat_graph import build_chat_graph
-  File "D:\Project\chatbot_final\AI_Agent\backend\chat_graph.py", line 80, in <module>
-    conn = psycopg.connect(DB_URI, autocommit=True)
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\psycopg\connection.py", line 118, in connect
-    raise last_ex.with_traceback(None)
-psycopg.OperationalError: connection failed: connection to server at "192.168.1.71", port 5432 failed: FATAL:  no pg_hba.conf entry for host "192.168.1.71", user "postgres", database "ChatGraphDB", no encryption
-2025-09-02 18:26:41.411715: Running on_exit tasks
-2025-09-02 18:26:41.419610: wfastcgi.py 3.0.0 closed
-2025-09-02 18:26:47.764260: Error occurred while reading WSGI handler:
-
-Traceback (most recent call last):
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 791, in main
-    env, handler = read_wsgi_handler(response.physical_path)
-                   ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 633, in read_wsgi_handler
-    handler = get_wsgi_handler(os.getenv("WSGI_HANDLER"))
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 600, in get_wsgi_handler
-    handler = __import__(module_name, fromlist=[name_list[0][0]])
-  File "D:\Project\chatbot_final\AI_Agent\backend\app.py", line 61, in <module>
-    from chat_graph import build_chat_graph
-  File "D:\Project\chatbot_final\AI_Agent\backend\chat_graph.py", line 80, in <module>
-    conn = psycopg.connect(DB_URI, autocommit=True)
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\psycopg\connection.py", line 118, in connect
-    raise last_ex.with_traceback(None)
-psycopg.OperationalError: connection failed: connection to server at "192.168.1.71", port 5432 failed: FATAL:  no pg_hba.conf entry for host "192.168.1.71", user "postgres", database "ChatGraphDB", no encryption
-
-
-StdOut: 
-
-StdErr: Neither CUDA nor MPS are available - defaulting to CPU. Note: This module is much faster with a GPU.
-D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\ctranslate2\__init__.py:8: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  import pkg_resources
-2025-09-02 18:26:47.773976: Unhandled exception in wfastcgi.py: Traceback (most recent call last):
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 791, in main
-    env, handler = read_wsgi_handler(response.physical_path)
-                   ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 633, in read_wsgi_handler
-    handler = get_wsgi_handler(os.getenv("WSGI_HANDLER"))
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 600, in get_wsgi_handler
-    handler = __import__(module_name, fromlist=[name_list[0][0]])
-  File "D:\Project\chatbot_final\AI_Agent\backend\app.py", line 61, in <module>
-    from chat_graph import build_chat_graph
-  File "D:\Project\chatbot_final\AI_Agent\backend\chat_graph.py", line 80, in <module>
-    conn = psycopg.connect(DB_URI, autocommit=True)
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\psycopg\connection.py", line 118, in connect
-    raise last_ex.with_traceback(None)
-psycopg.OperationalError: connection failed: connection to server at "192.168.1.71", port 5432 failed: FATAL:  no pg_hba.conf entry for host "192.168.1.71", user "postgres", database "ChatGraphDB", no encryption
-2025-09-02 18:26:47.782220: Running on_exit tasks
-2025-09-02 18:26:47.790323: wfastcgi.py 3.0.0 closed
-2025-09-02 18:27:01.752377: wfastcgi.py 3.0.0 started
-2025-09-02 18:27:01.763954: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
-2025-09-02 18:27:01.775713: wfastcgi.py 3.0.0 initializing
-2025-09-02 18:27:20.059754: Error occurred while reading WSGI handler:
-
-Traceback (most recent call last):
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 791, in main
-    env, handler = read_wsgi_handler(response.physical_path)
-                   ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 633, in read_wsgi_handler
-    handler = get_wsgi_handler(os.getenv("WSGI_HANDLER"))
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 600, in get_wsgi_handler
-    handler = __import__(module_name, fromlist=[name_list[0][0]])
-  File "D:\Project\chatbot_final\AI_Agent\backend\app.py", line 61, in <module>
-    from chat_graph import build_chat_graph
-  File "D:\Project\chatbot_final\AI_Agent\backend\chat_graph.py", line 80, in <module>
-    conn = psycopg.connect(DB_URI, autocommit=True)
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\psycopg\connection.py", line 118, in connect
-    raise last_ex.with_traceback(None)
-psycopg.OperationalError: connection failed: connection to server at "192.168.1.71", port 5432 failed: FATAL:  no pg_hba.conf entry for host "192.168.1.71", user "postgres", database "ChatGraphDB", no encryption
-
-
-StdOut: 
-
-StdErr: Neither CUDA nor MPS are available - defaulting to CPU. Note: This module is much faster with a GPU.
-D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\ctranslate2\__init__.py:8: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  import pkg_resources
-2025-09-02 18:27:20.072542: Unhandled exception in wfastcgi.py: Traceback (most recent call last):
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 791, in main
-    env, handler = read_wsgi_handler(response.physical_path)
-                   ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 633, in read_wsgi_handler
-    handler = get_wsgi_handler(os.getenv("WSGI_HANDLER"))
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 600, in get_wsgi_handler
-    handler = __import__(module_name, fromlist=[name_list[0][0]])
-  File "D:\Project\chatbot_final\AI_Agent\backend\app.py", line 61, in <module>
-    from chat_graph import build_chat_graph
-  File "D:\Project\chatbot_final\AI_Agent\backend\chat_graph.py", line 80, in <module>
-    conn = psycopg.connect(DB_URI, autocommit=True)
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\psycopg\connection.py", line 118, in connect
-    raise last_ex.with_traceback(None)
-psycopg.OperationalError: connection failed: connection to server at "192.168.1.71", port 5432 failed: FATAL:  no pg_hba.conf entry for host "192.168.1.71", user "postgres", database "ChatGraphDB", no encryption
-2025-09-02 18:27:20.081816: Running on_exit tasks
-2025-09-02 18:27:20.097793: wfastcgi.py 3.0.0 closed
-2025-09-02 18:28:38.785463: wfastcgi.py 3.0.0 started
-2025-09-02 18:28:38.796536: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
-2025-09-02 18:28:38.805701: wfastcgi.py 3.0.0 initializing
-2025-09-02 18:29:02.698122: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
-2025-09-02 18:29:02.707476: wfastcgi.py 3.0.0 initialized
-2025-09-02 18:29:02.815968: wfastcgi.py 3.0.0 started
-2025-09-02 18:29:02.825301: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
-2025-09-02 18:29:02.834226: wfastcgi.py 3.0.0 initializing
-2025-09-02 18:29:27.492215: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
-2025-09-02 18:29:27.502154: wfastcgi.py 3.0.0 initialized
-2025-09-03 09:21:50.092856: Unhandled exception in wfastcgi.py: Traceback (most recent call last):
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 774, in main
-    record = read_fastcgi_record(fcgi_stream)
-  File "D:\Project\chatbot_final\AI_Agent\backend\.venv\Lib\site-packages\wfastcgi.py", line 158, in read_fastcgi_record
-    data = stream.read(8)     # read record
-OSError: [Errno 22] Invalid argument
-2025-09-03 10:15:19.217972: wfastcgi.py 3.0.0 started
-2025-09-03 10:15:19.229230: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
-2025-09-03 10:15:19.239826: wfastcgi.py 3.0.0 initializing
-2025-09-03 10:15:28.286784: wfastcgi.py 3.0.0 started
-2025-09-03 10:15:28.295640: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
-2025-09-03 10:15:28.305486: wfastcgi.py 3.0.0 initializing
-2025-09-03 10:16:17.961918: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
-2025-09-03 10:16:17.970792: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
-2025-09-03 10:16:17.981784: wfastcgi.py 3.0.0 initialized
-2025-09-03 10:29:50.317868: wfastcgi.py 3.0.0 started
-2025-09-03 10:29:50.326909: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
-2025-09-03 10:29:50.339283: wfastcgi.py 3.0.0 initializing
-2025-09-03 10:30:22.533448: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
-2025-09-03 10:30:22.543113: wfastcgi.py 3.0.0 initialized
-2025-09-03 10:30:22.742611: wfastcgi.py 3.0.0 started
-2025-09-03 10:30:22.751718: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
-2025-09-03 10:30:22.760374: wfastcgi.py 3.0.0 initializing
-2025-09-03 10:30:54.758490: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
-2025-09-03 10:30:54.766986: wfastcgi.py 3.0.0 initialized
-2025-09-03 10:30:54.921787: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
-2025-09-03 10:30:54.934177: wfastcgi.py 3.0.0 initialized
+2025-09-03 11:25:57.545247: wfastcgi.py 3.0.0 started
+2025-09-03 11:25:57.551464: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 11:25:57.558352: wfastcgi.py 3.0.0 initializing
+2025-09-03 11:26:22.501820: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 11:26:22.508580: wfastcgi.py 3.0.0 initialized
+2025-09-03 11:26:22.615832: wfastcgi.py 3.0.0 started
+2025-09-03 11:26:22.621517: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 11:26:22.627015: wfastcgi.py 3.0.0 initializing
+2025-09-03 11:26:47.454614: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 11:26:47.466800: wfastcgi.py 3.0.0 initialized
+2025-09-03 11:30:27.565497: wfastcgi.py exiting because app.py has changed, matching .*((\.py)|(\.config))$
+2025-09-03 11:30:27.565838: wfastcgi.py exiting because app.py has changed, matching .*((\.py)|(\.config))$
+2025-09-03 11:30:27.576695: Running on_exit tasks
+2025-09-03 11:31:17.798846: wfastcgi.py 3.0.0 started
+2025-09-03 11:31:17.805066: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 11:31:17.811369: wfastcgi.py 3.0.0 initializing
+2025-09-03 11:31:44.071554: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 11:31:44.078471: wfastcgi.py 3.0.0 initialized
+2025-09-03 11:31:44.193451: wfastcgi.py 3.0.0 started
+2025-09-03 11:31:44.199480: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 11:31:44.208794: wfastcgi.py 3.0.0 initializing
+2025-09-03 11:32:06.808896: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 11:32:06.815403: wfastcgi.py 3.0.0 initialized
+2025-09-03 11:36:00.273139: wfastcgi.py exiting because app.py has changed, matching .*((\.py)|(\.config))$
+2025-09-03 11:36:00.278871: Running on_exit tasks
+2025-09-03 11:36:18.009395: wfastcgi.py 3.0.0 started
+2025-09-03 11:36:18.017645: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 11:36:18.023775: wfastcgi.py 3.0.0 initializing
+2025-09-03 11:36:42.892982: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 11:36:42.900019: wfastcgi.py 3.0.0 initialized
+2025-09-03 11:36:43.007539: wfastcgi.py 3.0.0 started
+2025-09-03 11:36:43.016729: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 11:36:43.023528: wfastcgi.py 3.0.0 initializing
+2025-09-03 11:37:06.123837: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 11:37:06.131213: wfastcgi.py 3.0.0 initialized
+2025-09-03 11:48:27.028902: wfastcgi.py 3.0.0 started
+2025-09-03 11:48:27.037350: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 11:48:27.044277: wfastcgi.py 3.0.0 initializing
+2025-09-03 11:48:58.234967: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 11:48:58.243461: wfastcgi.py 3.0.0 initialized
+2025-09-03 11:48:58.358018: wfastcgi.py 3.0.0 started
+2025-09-03 11:48:58.364100: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 11:48:58.370425: wfastcgi.py 3.0.0 initializing
+2025-09-03 11:49:20.804787: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 11:49:20.812049: wfastcgi.py 3.0.0 initialized
+2025-09-03 11:49:41.527231: wfastcgi.py 3.0.0 started
+2025-09-03 11:49:41.559740: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 11:49:41.592783: wfastcgi.py 3.0.0 initializing
+2025-09-03 11:50:14.646514: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 11:50:14.654089: wfastcgi.py 3.0.0 initialized
+2025-09-03 11:57:29.250418: wfastcgi.py 3.0.0 started
+2025-09-03 11:57:29.256848: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 11:57:29.263001: wfastcgi.py 3.0.0 initializing
+2025-09-03 11:57:32.565636: wfastcgi.py 3.0.0 started
+2025-09-03 11:57:32.572693: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 11:57:32.579390: wfastcgi.py 3.0.0 initializing
+2025-09-03 11:57:41.383493: wfastcgi.py 3.0.0 started
+2025-09-03 11:57:41.390927: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 11:57:41.398462: wfastcgi.py 3.0.0 initializing
+2025-09-03 11:57:41.555302: wfastcgi.py 3.0.0 started
+2025-09-03 11:57:41.563405: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 11:57:41.572060: wfastcgi.py 3.0.0 initializing
+2025-09-03 11:57:41.708556: wfastcgi.py 3.0.0 started
+2025-09-03 11:57:41.717380: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 11:57:41.727340: wfastcgi.py 3.0.0 initializing
+2025-09-03 11:58:01.794314: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 11:58:01.801206: wfastcgi.py 3.0.0 initialized
+2025-09-03 11:58:01.883361: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 11:58:01.891493: wfastcgi.py 3.0.0 initialized
+2025-09-03 11:58:24.981145: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 11:58:24.981230: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 11:58:24.989481: wfastcgi.py 3.0.0 initialized
+2025-09-03 11:58:25.025662: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 11:58:25.032252: wfastcgi.py 3.0.0 initialized
+2025-09-03 12:11:08.073685: wfastcgi.py 3.0.0 started
+2025-09-03 12:11:08.080717: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 12:11:08.091380: wfastcgi.py 3.0.0 initializing
+2025-09-03 12:11:09.525389: wfastcgi.py 3.0.0 started
+2025-09-03 12:11:09.532317: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 12:11:09.545496: wfastcgi.py 3.0.0 initializing
+2025-09-03 12:11:11.830751: wfastcgi.py 3.0.0 started
+2025-09-03 12:11:11.852045: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 12:11:11.869054: wfastcgi.py 3.0.0 initializing
+2025-09-03 12:11:55.379444: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 12:11:55.388351: wfastcgi.py 3.0.0 initialized
+2025-09-03 12:11:55.395999: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 12:11:55.402551: wfastcgi.py 3.0.0 initialized
+2025-09-03 12:11:55.430785: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 12:11:55.439976: wfastcgi.py 3.0.0 initialized
+2025-09-03 12:22:55.373875: wfastcgi.py 3.0.0 started
+2025-09-03 12:22:55.386351: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 12:22:55.393460: wfastcgi.py 3.0.0 initializing
+2025-09-03 12:23:30.187577: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 12:23:30.196467: wfastcgi.py 3.0.0 initialized
+2025-09-03 12:23:30.342601: wfastcgi.py 3.0.0 started
+2025-09-03 12:23:30.349036: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 12:23:30.356712: wfastcgi.py 3.0.0 initializing
+2025-09-03 12:23:51.973426: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 12:23:51.980054: wfastcgi.py 3.0.0 initialized
+2025-09-03 13:13:38.157227: wfastcgi.py 3.0.0 started
+2025-09-03 13:13:38.166260: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 13:13:38.173446: wfastcgi.py 3.0.0 initializing
+2025-09-03 13:13:40.464860: wfastcgi.py 3.0.0 started
+2025-09-03 13:13:40.472592: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 13:13:40.479039: wfastcgi.py 3.0.0 initializing
+2025-09-03 13:13:40.636998: wfastcgi.py 3.0.0 started
+2025-09-03 13:13:40.644983: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 13:13:40.656394: wfastcgi.py 3.0.0 initializing
+2025-09-03 13:13:40.857798: wfastcgi.py 3.0.0 started
+2025-09-03 13:13:40.868836: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 13:13:40.876875: wfastcgi.py 3.0.0 initializing
+2025-09-03 13:13:41.028379: wfastcgi.py 3.0.0 started
+2025-09-03 13:13:41.042118: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 13:13:41.055104: wfastcgi.py 3.0.0 initializing
+2025-09-03 13:14:29.772585: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 13:14:29.781044: wfastcgi.py 3.0.0 initialized
+2025-09-03 13:14:30.069586: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 13:14:30.077621: wfastcgi.py 3.0.0 initialized
+2025-09-03 13:14:30.131072: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 13:14:30.139293: wfastcgi.py 3.0.0 initialized
+2025-09-03 13:14:30.190409: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 13:14:30.198558: wfastcgi.py 3.0.0 initialized
+2025-09-03 13:14:30.566038: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 13:14:30.576766: wfastcgi.py 3.0.0 initialized
+2025-09-03 13:29:40.579109: wfastcgi.py 3.0.0 started
+2025-09-03 13:29:40.585521: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 13:29:40.591889: wfastcgi.py 3.0.0 initializing
+2025-09-03 13:29:47.899733: wfastcgi.py 3.0.0 started
+2025-09-03 13:29:47.906265: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 13:29:47.912871: wfastcgi.py 3.0.0 initializing
+2025-09-03 13:29:52.743328: wfastcgi.py 3.0.0 started
+2025-09-03 13:29:52.750217: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 13:29:52.757272: wfastcgi.py 3.0.0 initializing
+2025-09-03 13:29:54.592127: wfastcgi.py 3.0.0 started
+2025-09-03 13:29:54.601537: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 13:29:54.611632: wfastcgi.py 3.0.0 initializing
+2025-09-03 13:29:58.287836: wfastcgi.py 3.0.0 started
+2025-09-03 13:29:58.296276: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 13:29:58.304050: wfastcgi.py 3.0.0 initializing
+2025-09-03 13:30:16.005136: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 13:30:16.005223: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 13:30:16.016135: wfastcgi.py 3.0.0 initialized
+2025-09-03 13:30:18.874251: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 13:30:18.883916: wfastcgi.py 3.0.0 initialized
+2025-09-03 13:30:19.878756: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 13:30:19.888885: wfastcgi.py 3.0.0 initialized
+2025-09-03 13:30:25.014137: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 13:30:25.020827: wfastcgi.py 3.0.0 initialized
+2025-09-03 13:48:48.815512: wfastcgi.py 3.0.0 started
+2025-09-03 13:48:48.821884: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 13:48:48.828147: wfastcgi.py 3.0.0 initializing
+2025-09-03 13:48:54.948664: wfastcgi.py 3.0.0 started
+2025-09-03 13:48:54.955328: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 13:48:54.961975: wfastcgi.py 3.0.0 initializing
+2025-09-03 13:48:56.010946: wfastcgi.py 3.0.0 started
+2025-09-03 13:48:56.018295: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 13:48:56.025547: wfastcgi.py 3.0.0 initializing
+2025-09-03 13:49:03.284648: wfastcgi.py 3.0.0 started
+2025-09-03 13:49:03.291978: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-03 13:49:03.299443: wfastcgi.py 3.0.0 initializing
+2025-09-03 13:49:19.402343: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 13:49:19.410095: wfastcgi.py 3.0.0 initialized
+2025-09-03 13:49:20.490848: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 13:49:20.498779: wfastcgi.py 3.0.0 initialized
+2025-09-03 13:49:21.061354: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 13:49:21.069140: wfastcgi.py 3.0.0 initialized
+2025-09-03 13:49:27.945477: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-03 13:49:27.983544: wfastcgi.py 3.0.0 initialized
+2025-09-04 14:12:00.181743: wfastcgi.py 3.0.0 started
+2025-09-04 14:12:00.188666: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 14:12:00.194679: wfastcgi.py 3.0.0 initializing
+2025-09-04 14:12:02.524864: wfastcgi.py 3.0.0 started
+2025-09-04 14:12:02.531795: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 14:12:02.538463: wfastcgi.py 3.0.0 initializing
+2025-09-04 14:12:22.194598: wfastcgi.py 3.0.0 started
+2025-09-04 14:12:22.202518: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 14:12:22.209045: wfastcgi.py 3.0.0 initializing
+2025-09-04 14:12:33.713513: wfastcgi.py 3.0.0 started
+2025-09-04 14:12:33.728257: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 14:12:33.736458: wfastcgi.py 3.0.0 initializing
+2025-09-04 14:12:56.573410: wfastcgi.py 3.0.0 started
+2025-09-04 14:12:56.580142: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 14:12:56.588067: wfastcgi.py 3.0.0 initializing
+2025-09-04 14:14:06.805521: wfastcgi.py 3.0.0 started
+2025-09-04 14:14:06.813199: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 14:14:06.820639: wfastcgi.py 3.0.0 initializing
+2025-09-04 14:14:17.226109: wfastcgi.py 3.0.0 started
+2025-09-04 14:14:17.231996: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 14:14:17.238185: wfastcgi.py 3.0.0 initializing
+2025-09-04 14:14:19.304495: wfastcgi.py 3.0.0 started
+2025-09-04 14:14:19.317825: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 14:14:19.329742: wfastcgi.py 3.0.0 initializing
+2025-09-04 14:18:05.183475: wfastcgi.py 3.0.0 started
+2025-09-04 14:18:05.189551: Python version: 3.13.3 (tags/v3.13.3:6280bb5, Apr  8 2025, 14:47:33) [MSC v.1943 64 bit (AMD64)]
+2025-09-04 14:18:05.195659: wfastcgi.py 3.0.0 initializing
+2025-09-04 14:18:32.767412: wfastcgi.py will restart when files in D:\Project\chatbot_final\AI_Agent\backend\ are changed: .*((\.py)|(\.config))$
+2025-09-04 14:18:32.774578: wfastcgi.py 3.0.0 initialized

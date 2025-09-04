@@ -5,7 +5,9 @@ import os
 import requests
 import numpy as np
 import re
+import sys
 import logging
+from logging.handlers import RotatingFileHandler
 import cv2
 import easyocr
 reader = easyocr.Reader(
@@ -26,6 +28,31 @@ import io
 import tempfile
 from knowledge_base import knowledge_retriever_tool
  
+# Setup rotating file handler
+handler = RotatingFileHandler("D:/Project/chatbot_final/AI_Agent/backend/logs/chatbot.log", maxBytes=5*1024*1024, backupCount=5)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger = logging.getLogger()  # root logger
+logger.setLevel(logging.INFO)
+logger.addHandler(handler)
+
+# Redirect stdout/stderr
+class StreamToLogger(object):
+    def __init__(self, logger, level):
+        self.logger = logger
+        self.level = level
+        self.linebuf = ''
+
+    def write(self, buf):
+        for line in buf.rstrip().splitlines():
+            self.logger.log(self.level, line.rstrip())
+
+    def flush(self):
+        pass
+
+sys.stdout = StreamToLogger(logger, logging.INFO)
+sys.stderr = StreamToLogger(logger, logging.ERROR)
+
 # ---------- Load env ----------
 load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
