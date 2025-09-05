@@ -160,7 +160,7 @@ def image_chat():
             "Always try to frame a proper answer."
         )
 
-        config = {"configurable": {"thread_id": {thread_id}}}
+        config = {"configurable": {"thread_id": thread_id}}
         result = graph.invoke(
             {"messages": [HumanMessage(content=prompt_text)]},
             config=config
@@ -186,7 +186,7 @@ def chat():
         return jsonify({"error": "No message provided"}), 400
 
     # Load previous state or initialize new
-    config = {"configurable": {"thread_id": {thread_id}}}
+    config = {"configurable": {"thread_id": thread_id}}
     # previous_state = graph.get_state(config).values if graph.get_state(config) else {}
     # state = {
     #     "messages": previous_state.get("messages", []) + [HumanMessage(content=user_input)]
@@ -424,7 +424,7 @@ def run_agent_multimodal(user_text: str, image_bytes: bytes , thread_id: str) ->
 
     # Encode image as base64
     b64_img = base64.b64encode(image_bytes).decode("utf-8")
-    config = {"configurable": {"thread_id": {thread_id}}}
+    config = {"configurable": {"thread_id": thread_id}}
     snapshot = graph.get_state(config)
     previous_state = snapshot.values if snapshot.values else {"messages": []}
     # Send multimodal request to Gemini
@@ -463,13 +463,12 @@ def widget_page():
 def assets(filename):
     return send_from_directory(f"{app.static_folder}/assets", filename)
 
-@app.route("/", methods=["GET"])
+@app.route("/", methods=["POST"])
 def hello():
-    thread_id = request.args.get("thread_id")
-    logger.info(f"Health check. thread_id: {thread_id}")
+    data = request.get_json()
+    thread_id = data.get("thread_id", "").strip()
     config = {"configurable": {"thread_id": thread_id}}
     snapshot = graph.get_state(config)
-    logging.info(f"Snapshot: {snapshot}")
     previous_state = snapshot.values if snapshot.values else {"messages": []}
     return jsonify({"history": [{"role" : "model" if msg.type == "ai" else "user", "parts" : [{ "text": msg.content }]} for msg in previous_state["messages"] if msg.type != "tool" and msg.content.strip() != ""]})
 

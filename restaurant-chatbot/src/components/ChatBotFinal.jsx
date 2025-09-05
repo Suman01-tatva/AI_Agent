@@ -3,9 +3,9 @@ import parse from "html-react-parser";
 import itc_logo from "../../public/ITC-Hotels-logo.svg"
 
 const params = new URLSearchParams(window.location.search);
-const userId = params.get("user_id") || "default_user";
-const appId = params.get("app_id") || "default_app";
-const threadId = appId + "_" + userId;
+const userId = params.get("user_id");
+const appId = params.get("app_id");
+const threadId = appId +"_"+ userId;
 
 const ChatBotFinal = () => {
   const [messages, setMessages] = useState([]);
@@ -80,9 +80,10 @@ const ChatBotFinal = () => {
 
   useEffect(() => {
     const getPreviousChat = async () => {
-      const response = await fetch(`https://192.168.1.71:443/?thread_id=${threadId}`, {
-        method: "GET",
+      const response = await fetch("http://localhost:5000", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ thread_id : threadId})
       });
       if (response.ok) {
         const data = await response.json();
