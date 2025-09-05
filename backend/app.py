@@ -425,9 +425,11 @@ def run_agent_multimodal(user_text: str, image_bytes: bytes) -> str:
     # Return model’s text reply
     return final_response
 
-@app.route("/")
+@app.route("/", methods=["POST"])
 def hello():
-    config = {"configurable": {"thread_id": f"{user_id}-{thread_id}"}}
+    data = request.get_json()
+    thread_id = data.get("thread_id", "").strip()
+    config = {"configurable": {"thread_id": thread_id}}
     snapshot = graph.get_state(config)
     previous_state = snapshot.values if snapshot.values else {"messages": []}
     return jsonify({"history": [{"role" : "model" if msg.type == "ai" else "user", "parts" : [{ "text": msg.content }]} for msg in previous_state["messages"] if msg.type != "tool" and msg.content.strip() != ""]})

@@ -75,7 +75,9 @@ const ChatBotFinal = () => {
   useEffect(() => {
     const getPreviousChat = async () => {
       const response = await fetch("http://localhost:5000", {
-        method: "GET",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ thread_id : "{'restaurant_chatbot_user1'}"})
       });
       if (response.ok) {
         const data = await response.json();
